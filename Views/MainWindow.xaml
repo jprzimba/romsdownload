@@ -1,0 +1,71 @@
+﻿<Controls:MetroWindow x:Class="romsdownloader.Views.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      Title="ROMS Download" Height="450" Width="950" BorderBrush="#000000" BorderThickness="1" WindowStartupLocation="CenterScreen">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Click="BtnDonateClick">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_money}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Donate" />
+                </StackPanel>
+            </Button>
+            <Button Click="BtnGithubClick">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_github}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Github" />
+                </StackPanel>
+            </Button>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="37.812" />
+            <ColumnDefinition Width="44.291"/>
+            <ColumnDefinition Width="87*" />
+            <ColumnDefinition Width="7*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Search Game:" Grid.ColumnSpan="2"></Label>
+        <TextBox Margin="44,0,0,4" Name="txtFilter" TextChanged="txtFilter_TextChanged" BorderBrush="Orange" Background="DimGray" BorderThickness="0" Grid.ColumnSpan="3" Grid.Column="1"/>
+
+        <Controls:MetroTabControl Grid.Row="1" Grid.ColumnSpan="4">
+            <!-- SUBTITLED -->
+            <Controls:MetroTabItem Header="Game List">
+                <ListView x:Name="GamesListView" Padding="4" MouseDoubleClick="GamesListView_MouseDoubleClick">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="5"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <Image Margin="4" Source="{Binding Image}" Width="250" Height="140"/>
+                                <Label Margin="4" Content="{Binding Title}" Width="250" Height="30" HorizontalContentAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListView>
+            </Controls:MetroTabItem>
+        </Controls:MetroTabControl>
+    </Grid>
+</Controls:MetroWindow>

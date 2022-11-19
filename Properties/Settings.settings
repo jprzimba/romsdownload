@@ -1,0 +1,9 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="romsdownload.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ROMSPEDIA_BASE_URL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://www.romspedia.com</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
