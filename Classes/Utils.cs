@@ -1,4 +1,5 @@
-﻿using System;
+﻿using romsdownload.Properties;
+using System;
 using System.IO;
 
 namespace romsdownloader.Classes

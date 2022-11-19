@@ -5,5 +5,77 @@
     <Setting Name="ROMSPEDIA_BASE_URL" Type="System.String" Scope="User">
       <Value Profile="(Default)">https://www.romspedia.com</Value>
     </Setting>
+    <Setting Name="ROMSPEDIA_PATH_PS2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/playstation-2</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_PSX" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/playstation-1</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_GB" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/gameboy</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_GBA" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/gameboy-advance</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_GBC" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/gameboy-color</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_N64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo-64</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_SNES" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/super-nintendo</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_NES" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_NDS" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo-ds</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_WII" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo-wii</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_MAME" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/mame</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_PSP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/playstation-portable</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_3DS" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo-3ds</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_AMIGA" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/amiga</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_ATARI_2600" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/atari-2600</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_ATARI_5200" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/atari-5200</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_ATARI_7800" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/atari-7800</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_ATARI_JAGUAR" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/atari-jaguar</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_DREAMCAST" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/sega-dreamcast</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_FAMICOM" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/famicom</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_GAMECUBE" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/nintendo-gamecube</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_GAMEGEAR" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/sega-game-gear</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_MASTER_SYSTEM" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/sega-master-system</Value>
+    </Setting>
+    <Setting Name="ROMSPEDIA_PATH_MEGA_DRIVE" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/roms/sega-genesis</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

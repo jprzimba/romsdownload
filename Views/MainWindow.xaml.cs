@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
-using MahApps.Metro.Controls.Dialogs;
 using romsdownload.Models;
 using System.Collections.Generic;
 using System.Windows.Input;
 using HtmlAgilityPack;
-using MahApps.Metro.Controls;
 using romsdownload.Properties;
-using System.Windows.Data;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace romsdownloader.Views
 {
     public partial class MainWindow
     {
-        public static MainWindow Instance;
         private string downloadDirectory = Application.Current.StartupUri + "\\Games";
 
         private List<GameList> ContentList;
@@ -25,55 +22,31 @@ namespace romsdownloader.Views
         {
             InitializeComponent();
 
-            Instance = this;
-
             Loaded += WindowLoaded;
             Closed += WindowClosed;
         }
 
-        #region Window Events
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            ContentList = new List<GameList>();
-            if (GamesListView.ItemsSource != null)
-            {
-                CollectionView allView = (CollectionView)CollectionViewSource.GetDefaultView(GamesListView.ItemsSource);
-                allView.Filter = UserFilter;
-            }
 
-            Instance.LoadGames("https://www.romspedia.com/roms/playstation-2", Instance);
         }
 
         private void WindowClosed(object sender, EventArgs e)
         {
             Application.Current.Shutdown();
         }
-        #endregion
 
-        #region Right Window Commands
-
-        private void BtnDonateClick(object sender, RoutedEventArgs e)
+        private async void LoadGames(string page)
         {
-            Process.Start("https://www.paypal.com/");
-        }
-
-        private void BtnGithubClick(object sender, RoutedEventArgs e)
-        {
-            Process.Start("https://github.com/tryller/romsdownload/issues");
-        }
-
-        #endregion
-
-        private async void LoadGames(string page, MetroWindow window)
-        {
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
             string gameName = string.Empty;
             string gameUrl = string.Empty;
             string url = page;
             string coverImage = string.Empty;
 
-            var controller = await window.ShowProgressAsync("Loading...", "Please wait...");
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            GamesListView.Visibility = Visibility.Hidden;
+            TransformControls(false);
+            ContentList = new List<GameList>();
+            uxLabelStatus.Text = "Loading...";
         GRAB:
             try
             {
@@ -91,11 +64,13 @@ namespace romsdownloader.Views
                     if (coverImage.StartsWith("data:image"))
                         coverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
 
+                    await Task.Delay(TimeSpan.FromMilliseconds(1));
                     Games = new GameList();
                     Games.Title = gameName;
                     Games.Image = coverImage;
                     Games.Url = gameUrl;
                     ContentList.Add(Games);
+                    uxLabelStatus.Text = "Loading games...";
                 }
 
                 //Next Page
@@ -107,6 +82,7 @@ namespace romsdownloader.Views
                     checkNextPage = node.InnerText;
                     if (checkNextPage.Equals(">"))
                     {
+                        await Task.Delay(TimeSpan.FromMilliseconds(1));
                         nextPage = node.GetAttributeValue("href", "");
                         nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
                         url = nextPage;
@@ -116,26 +92,21 @@ namespace romsdownloader.Views
             }
             catch { }
 
-
-            for (int i = 0; i < 101; i++)
-            {
-                controller.SetProgress(i / 100.0);
-                controller.SetMessage(string.Format("Loading: {0}%", i));
-
-                if (controller.IsCanceled)
-                    break;
-
-                await Task.Delay(100);
-
-            }
-
-            GamesListView.ItemsSource = ContentList;
-            GamesListView.Visibility = Visibility.Visible;
-
-            await controller.CloseAsync().ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            uxLabelStatus.Text = "Loading... Done!";
+            uxGamesListView.ItemsSource = ContentList;
+            TransformControls(true);
         }
 
-        private void GamesListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TransformControls(bool status)
+        {
+            uxComboPlataform.IsEnabled = status;
+            uxGamesListView.IsEnabled = status;
+            uxTextBoxSearch.IsEnabled = status;
+            uxMainTabPanel.IsEnabled = status;
+        }
+
+        private void uxGamesListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             System.Windows.Controls.ListView list = (System.Windows.Controls.ListView)sender;
             GameList item = (GameList)list.SelectedItem;
@@ -145,19 +116,168 @@ namespace romsdownloader.Views
             }
         }
 
-        private void txtFilter_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private async void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            CollectionViewSource.GetDefaultView(GamesListView.ItemsSource).Refresh();
-            CollectionViewSource.GetDefaultView(GamesListView.ItemsSource).Refresh();
-
+            string keyword = uxTextBoxSearch.Text;
+            if (keyword.Length >= 1)
+            {
+                var s = ContentList.Where(c => c.Title.ToLower().Contains(keyword.ToLower()));
+                uxGamesListView.ItemsSource = s;
+            }
+            else
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                uxGamesListView.ItemsSource = ContentList;
+            }
         }
 
-        private bool UserFilter(object item)
+        #region Menu
+        private void uxBtnExit_Click(object sender, RoutedEventArgs e)
         {
-            if (String.IsNullOrEmpty(txtFilter.Text))
-                return true;
-
-            return ((item as GameList).Title.IndexOf(txtFilter.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            Application.Current.Shutdown();
         }
-    }
+
+        private void uxBtnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://paypal.com");
+        }
+
+        private void uxBtnGitHubProject_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/tryller/romsdownload");
+        }
+
+        private void uxBtnGitHubIssues_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/tryller/romsdownload/issues");
+        }
+        #endregion
+
+        private void uxComboPlataform_DropDownClosed(object sender, EventArgs e)
+        {
+            string selectionText = uxComboPlataform.Text.Trim().ToUpper();
+            string page = string.Empty;
+
+            if (selectionText.Equals("3DS"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_3DS;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("AMIGA"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_AMIGA;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("ATARI 2600"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_2600;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("ATARI 5200"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_5200;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("ATARI 7800"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_7800;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("ATARI JAGUAR"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_JAGUAR;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("DREAMCAST"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_DREAMCAST;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("FAMICOM"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_FAMICOM;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("GAME CUBE"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMECUBE;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("GAME GEAR"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("GB"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GB;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("GBA"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBA;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("GBC"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBC;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("M.A.M.E"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MAME;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("MASTER SYSTEM"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MASTER_SYSTEM;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("MEGA DRIVE"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MEGA_DRIVE;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("NES"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NES;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("SNES"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_SNES;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("N64"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_N64;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("NDS"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NDS;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("PSX"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSX;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("PS2"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PS2;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("PSP"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSP;
+                LoadGames(page);
+            }
+            else if (selectionText.Equals("WII"))
+            {
+                page = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_WII;
+                LoadGames(page);
+            }
+        }
+    } 
 }

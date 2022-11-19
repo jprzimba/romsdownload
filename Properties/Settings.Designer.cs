@@ -34,5 +34,293 @@ namespace romsdownload.Properties {
                 this["ROMSPEDIA_BASE_URL"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/playstation-2")]
+        public string ROMSPEDIA_PATH_PS2 {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_PS2"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_PS2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/playstation-1")]
+        public string ROMSPEDIA_PATH_PSX {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_PSX"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_PSX"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/gameboy")]
+        public string ROMSPEDIA_PATH_GB {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_GB"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_GB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/gameboy-advance")]
+        public string ROMSPEDIA_PATH_GBA {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_GBA"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_GBA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/gameboy-color")]
+        public string ROMSPEDIA_PATH_GBC {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_GBC"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_GBC"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo-64")]
+        public string ROMSPEDIA_PATH_N64 {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_N64"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_N64"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/super-nintendo")]
+        public string ROMSPEDIA_PATH_SNES {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_SNES"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_SNES"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo")]
+        public string ROMSPEDIA_PATH_NES {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_NES"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_NES"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo-ds")]
+        public string ROMSPEDIA_PATH_NDS {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_NDS"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_NDS"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo-wii")]
+        public string ROMSPEDIA_PATH_WII {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_WII"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_WII"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/mame")]
+        public string ROMSPEDIA_PATH_MAME {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_MAME"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_MAME"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/playstation-portable")]
+        public string ROMSPEDIA_PATH_PSP {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_PSP"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_PSP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo-3ds")]
+        public string ROMSPEDIA_PATH_3DS {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_3DS"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_3DS"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/amiga")]
+        public string ROMSPEDIA_PATH_AMIGA {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_AMIGA"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_AMIGA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/atari-2600")]
+        public string ROMSPEDIA_PATH_ATARI_2600 {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_ATARI_2600"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_ATARI_2600"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/atari-5200")]
+        public string ROMSPEDIA_PATH_ATARI_5200 {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_ATARI_5200"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_ATARI_5200"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/atari-7800")]
+        public string ROMSPEDIA_PATH_ATARI_7800 {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_ATARI_7800"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_ATARI_7800"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/atari-jaguar")]
+        public string ROMSPEDIA_PATH_ATARI_JAGUAR {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_ATARI_JAGUAR"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_ATARI_JAGUAR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/sega-dreamcast")]
+        public string ROMSPEDIA_PATH_DREAMCAST {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_DREAMCAST"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_DREAMCAST"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/famicom")]
+        public string ROMSPEDIA_PATH_FAMICOM {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_FAMICOM"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_FAMICOM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/nintendo-gamecube")]
+        public string ROMSPEDIA_PATH_GAMECUBE {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_GAMECUBE"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_GAMECUBE"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/sega-game-gear")]
+        public string ROMSPEDIA_PATH_GAMEGEAR {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_GAMEGEAR"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_GAMEGEAR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/sega-master-system")]
+        public string ROMSPEDIA_PATH_MASTER_SYSTEM {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_MASTER_SYSTEM"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_MASTER_SYSTEM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/roms/sega-genesis")]
+        public string ROMSPEDIA_PATH_MEGA_DRIVE {
+            get {
+                return ((string)(this["ROMSPEDIA_PATH_MEGA_DRIVE"]));
+            }
+            set {
+                this["ROMSPEDIA_PATH_MEGA_DRIVE"] = value;
+            }
+        }
     }
 }

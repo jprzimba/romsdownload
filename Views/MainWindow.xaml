@@ -1,55 +1,67 @@
-﻿<Controls:MetroWindow x:Class="romsdownloader.Views.MainWindow"
-                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                      Title="ROMS Download" Height="450" Width="950" BorderBrush="#000000" BorderThickness="1" WindowStartupLocation="CenterScreen">
-    <Controls:MetroWindow.RightWindowCommands>
-        <Controls:WindowCommands>
-            <Button Click="BtnDonateClick">
-                <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="20" Height="20"
-                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_money}" />
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Donate" />
-                </StackPanel>
-            </Button>
-            <Button Click="BtnGithubClick">
-                <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="20" Height="20"
-                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_github}" />
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Github" />
-                </StackPanel>
-            </Button>
-        </Controls:WindowCommands>
-    </Controls:MetroWindow.RightWindowCommands>
+﻿<Window x:Class="romsdownloader.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ROMS Download" Height="450" Width="950" BorderBrush="#000000" BorderThickness="1" WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <DockPanel Name="uxDockPanel">
+        <Menu Padding="10" DockPanel.Dock="Top">
+                <MenuItem Header="File">
+                    <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click"></MenuItem>
+                </MenuItem>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="37.812" />
-            <ColumnDefinition Width="44.291"/>
-            <ColumnDefinition Width="87*" />
-            <ColumnDefinition Width="7*"/>
-        </Grid.ColumnDefinitions>
+                <MenuItem Header="About">
+                    <MenuItem Header="Doname" Name="uxBtnCredits" Click="uxBtnDonate_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Git Hub">
+                        <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click"/>
+                        <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click"/>
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
 
-        <Label Content="Search Game:" Grid.ColumnSpan="2"></Label>
-        <TextBox Margin="44,0,0,4" Name="txtFilter" TextChanged="txtFilter_TextChanged" BorderBrush="Orange" Background="DimGray" BorderThickness="0" Grid.ColumnSpan="3" Grid.Column="1"/>
+        <DockPanel DockPanel.Dock="Top">
+            <Label Content="Select Game:" Margin="10"></Label>
+            <ComboBox Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed">
+                <ComboBoxItem>3DS</ComboBoxItem>
+                <ComboBoxItem>AMIGA</ComboBoxItem>
+                <ComboBoxItem>ATARI 2600</ComboBoxItem>
+                <ComboBoxItem>ATARI 5200</ComboBoxItem>
+                <ComboBoxItem>ATARI 7800</ComboBoxItem>
+                <ComboBoxItem>ATARI JAGUAR</ComboBoxItem>
+                <ComboBoxItem>DREAMCAST</ComboBoxItem>
+                <ComboBoxItem>FAMICOM</ComboBoxItem>
+                <ComboBoxItem>GAME CUBE</ComboBoxItem>
+                <ComboBoxItem>GAME GEAR</ComboBoxItem>
+                <ComboBoxItem>GB</ComboBoxItem>
+                <ComboBoxItem>GBA</ComboBoxItem>
+                <ComboBoxItem>GBC</ComboBoxItem>
+                <ComboBoxItem>M.A.M.E</ComboBoxItem>
+                <ComboBoxItem>MASTER SYSTEM</ComboBoxItem>
+                <ComboBoxItem>MEGA DRIVE</ComboBoxItem>
+                <ComboBoxItem>N64</ComboBoxItem>
+                <ComboBoxItem>NDS</ComboBoxItem>
+                <ComboBoxItem>NES</ComboBoxItem>
+                <ComboBoxItem>PSX</ComboBoxItem>
+                <ComboBoxItem>PS2</ComboBoxItem>
+                <ComboBoxItem>PSP</ComboBoxItem>
+                <ComboBoxItem>SNES</ComboBoxItem>
+                <ComboBoxItem>WII</ComboBoxItem>
+            </ComboBox>
 
-        <Controls:MetroTabControl Grid.Row="1" Grid.ColumnSpan="4">
-            <!-- SUBTITLED -->
-            <Controls:MetroTabItem Header="Game List">
-                <ListView x:Name="GamesListView" Padding="4" MouseDoubleClick="GamesListView_MouseDoubleClick">
+            <Label Content="Search Game:" Margin="10"></Label>
+            <TextBox Margin="0,10,10,10" Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged"/>
+        </DockPanel>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Name="uxLabelStatus"/>
+            </StatusBarItem>
+        </StatusBar>
+        
+        <TabControl DockPanel.Dock="Top" Name="uxMainTabPanel">
+            <!-- Game List -->
+            <TabItem Header="Game List">
+                <ListView x:Name="uxGamesListView" Padding="4" MouseDoubleClick="uxGamesListView_MouseDoubleClick">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="5"/>
@@ -65,7 +77,43 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListView>
-            </Controls:MetroTabItem>
-        </Controls:MetroTabControl>
-    </Grid>
-</Controls:MetroWindow>
+            </TabItem>
+
+            <!-- Downloads -->
+            <TabItem Header="Downloads">
+                <DockPanel Name="downloadsPanel" Background="#FFF9F9F9">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="dgScrollViewer">
+                        <DataGrid AutoGenerateColumns="False" Name="downloadsGrid" VerticalContentAlignment="Center" DockPanel.Dock="Top" 
+                            BorderThickness="0" IsReadOnly="True" GridLinesVisibility="None" MinRowHeight="22" RowBackground="#FFF9F9F9"
+                            Background="#FFF9F9F9" HorizontalGridLinesBrush="#FFCBCBCB" VerticalGridLinesBrush="#FFCBCBCB" 
+                            CanUserResizeRows="False">
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="File Name" CellStyle="{StaticResource LeftCellStyle}" MinWidth="150" Width="150" x:Name="tcFileName" Binding="{Binding FileName, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Size" HeaderStyle="{StaticResource RightHeaderStyle}" CellStyle="{StaticResource RightCellStyle}" MinWidth="80" Width="80" x:Name="tcSize" Binding="{Binding FileSizeString, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Downloaded" HeaderStyle="{StaticResource RightHeaderStyle}" CellStyle="{StaticResource RightCellStyle}" MinWidth="80" Width="80" x:Name="tcDownloaded" Binding="{Binding DownloadedSizeString, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Percent" HeaderStyle="{StaticResource RightHeaderStyle}" CellStyle="{StaticResource RightCellStyle}" MinWidth="55" Width="55" x:Name="tcPercent" Binding="{Binding PercentString, Mode=OneWay}" />
+                                <DataGridTemplateColumn Header="Progress" HeaderStyle="{StaticResource CenterHeaderStyle}" CellStyle="{StaticResource CenterCellStyle}" MinWidth="130" Width="130" x:Name="tcProgress">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ProgressBar Name="progressBar" Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center" Height="16" MinHeight="16" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Speed" HeaderStyle="{StaticResource RightHeaderStyle}" CellStyle="{StaticResource RightCellStyle}" MinWidth="85" Width="85" x:Name="tcSpeed" Binding="{Binding DownloadSpeed, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Time Left" HeaderStyle="{StaticResource RightHeaderStyle}" CellStyle="{StaticResource RightCellStyle}" MinWidth="70" Width="70" x:Name="tcTimeLeft" Binding="{Binding TimeLeft, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Status" CellStyle="{StaticResource LeftCellStyle}" MinWidth="95" Width="95" x:Name="tcStatus" Binding="{Binding StatusString, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Added On" HeaderStyle="{StaticResource CenterHeaderStyle}" CellStyle="{StaticResource CenterCellStyle}" MinWidth="130" Width="130" x:Name="tcAddedOn" Binding="{Binding AddedOnString, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Completed On" HeaderStyle="{StaticResource CenterHeaderStyle}" CellStyle="{StaticResource CenterCellStyle}" MinWidth="130" Width="130" x:Name="tcCompletedOn" Binding="{Binding CompletedOnString, Mode=OneWay}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
