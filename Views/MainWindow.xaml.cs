@@ -61,7 +61,7 @@ namespace romsdownloader.Views
             Utils.CreateDirectory(folder);
             var file = Path.Combine(folder, "GameList.json");
             if (!File.Exists(file))
-            _ = DownloadFile();
+                _ = DownloadFile();
         }
 
         private void WindowClosed(object sender, EventArgs e)
@@ -1169,7 +1169,7 @@ namespace romsdownloader.Views
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 statusBarDownloads.Content = "Loading Games... DONE!";
-               }
+            }
             catch
             {
                 ContentList.Clear();
@@ -1442,5 +1442,118 @@ namespace romsdownloader.Views
             Process.Start("https://github.com/tryller/romsdownload/issues");
         }
         #endregion
-    } 
+
+        private void uxContextMenuDeleteSelected_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (downloadsGrid.SelectedItems.Count > 0)
+                {
+                    MessageBoxResult result = MessageBoxResult.None;
+                    string message = "Are you sure you want to delete the selected download(s)?";
+                    result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        var selectedDownloads = downloadsGrid.SelectedItems.Cast<WebDownloadClient>();
+                        var downloadsToDelete = new List<WebDownloadClient>();
+
+                        foreach (WebDownloadClient download in selectedDownloads)
+                        {
+                            if (download.HasError || download.Status == DownloadStatus.Paused || download.Status == DownloadStatus.Queued)
+                            {
+                                if (File.Exists(download.TempDownloadPath))
+                                {
+                                    File.Delete(download.TempDownloadPath);
+                                }
+                                download.Status = DownloadStatus.Deleting;
+                                downloadsToDelete.Add(download);
+                            }
+                            else if (download.Status == DownloadStatus.Completed)
+                            {
+                                download.Status = DownloadStatus.Deleting;
+                                downloadsToDelete.Add(download);
+                            }
+                            else
+                            {
+                                download.Status = DownloadStatus.Deleting;
+                                while (true)
+                                {
+                                    if (download.DownloadThread.ThreadState == System.Threading.ThreadState.Stopped)
+                                    {
+                                        if (File.Exists(download.TempDownloadPath))
+                                        {
+                                            File.Delete(download.TempDownloadPath);
+                                        }
+                                        downloadsToDelete.Add(download);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach (var download in downloadsToDelete)
+                        {
+                            download.Status = DownloadStatus.Deleted;
+                            DownloadManager.Instance.DownloadsList.Remove(download);
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void uxContextMenuClearCompleteds_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (DownloadManager.Instance.TotalDownloads > 0)
+                {
+                    var downloadsToClear = new List<WebDownloadClient>();
+
+                    foreach (var download in DownloadManager.Instance.DownloadsList)
+                    {
+                        if (download.Status == DownloadStatus.Completed)
+                        {
+                            download.Status = DownloadStatus.Deleting;
+                            downloadsToClear.Add(download);
+                        }
+                    }
+
+                    foreach (var download in downloadsToClear)
+                    {
+                        download.Status = DownloadStatus.Deleted;
+                        DownloadManager.Instance.DownloadsList.Remove(download);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void uxContextMenuPlayPause_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (downloadsGrid.SelectedItems.Count > 0)
+                {
+                    var selectedDownloads = downloadsGrid.SelectedItems.Cast<WebDownloadClient>();
+
+                    foreach (WebDownloadClient download in selectedDownloads)
+                    {
+                        if (download.Status == DownloadStatus.Paused || download.HasError)
+                        {
+                            download.Start();
+                            uxContextMenuPlayPause.Header = "Pause";
+                        }
+                        else
+                        {
+                            download.Pause();
+                            uxContextMenuPlayPause.Header = "Play";
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+    }
 }

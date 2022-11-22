@@ -111,6 +111,15 @@
                                 <DataGridTextColumn Header="Added On" HeaderStyle="{StaticResource CenterHeaderStyle}" CellStyle="{StaticResource CenterCellStyle}" MinWidth="130" Width="130" x:Name="tcAddedOn" Binding="{Binding AddedOnString, Mode=OneWay}" />
                                 <DataGridTextColumn Header="Completed On" HeaderStyle="{StaticResource CenterHeaderStyle}" CellStyle="{StaticResource CenterCellStyle}" MinWidth="130" Width="130" x:Name="tcCompletedOn" Binding="{Binding CompletedOnString, Mode=OneWay}" />
                             </DataGrid.Columns>
+
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Pause" Name="uxContextMenuPlayPause" Click="uxContextMenuPlayPause_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Delete Selected" Name="uxContextMenuDeleteSelected" Click="uxContextMenuDeleteSelected_Click"/>
+                                    <MenuItem Header="Clear Completeds" Name="uxContextMenuClearCompleteds" Click="uxContextMenuClearCompleteds_Click"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                         </DataGrid>
                     </ScrollViewer>
                 </DockPanel>
