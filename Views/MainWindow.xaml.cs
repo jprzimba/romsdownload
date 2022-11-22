@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using HtmlAgilityPack;
 using romsdownload.Properties;
 using romsdownloader.Classes;
+using romsdownload.Download;
+using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace romsdownloader.Views
 {
@@ -23,12 +26,27 @@ namespace romsdownloader.Views
         public string GameName { get; private set; }
         public string GameUrl { get; private set; }
         public string CoverImage { get; private set; }
+
+        private List<string> propertyNames;
+        private List<string> propertyValues;
+        private List<PropertyModel> propertiesList;
         #endregion
 
         #region Constructor
         public MainWindow()
         {
             InitializeComponent();
+
+            propertyNames = new List<string>();
+            propertyNames.Add("URL");
+            propertyNames.Add("Supports Resume");
+            propertyNames.Add("File Type");
+            propertyNames.Add("Download Folder");
+            propertyNames.Add("Average Speed");
+            propertyNames.Add("Total Time");
+
+            propertyValues = new List<string>();
+            propertiesList = new List<PropertyModel>();
 
             Loaded += WindowLoaded;
             Closed += WindowClosed;
@@ -40,6 +58,7 @@ namespace romsdownloader.Views
         {
             _ = Task.Delay(TimeSpan.FromMilliseconds(1));
             var folder = "Cache";
+            Utils.CreateDirectory(folder);
             var file = Path.Combine(folder, "GameList.json");
             if (!File.Exists(file))
             _ = DownloadFile();
@@ -58,7 +77,7 @@ namespace romsdownloader.Views
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 ContentList = new List<GameList>();
-                uxLabelStatus.Text = "Loading Games... Please Wait!";
+                statusBarDownloads.Content = "Loading Games... Please Wait!";
 
                 var GameUrlPage = string.Empty;
 
@@ -87,7 +106,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -131,7 +150,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -176,7 +195,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -222,7 +241,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -267,7 +286,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -312,7 +331,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -357,7 +376,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -402,7 +421,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -446,7 +465,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -492,7 +511,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -537,7 +556,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -582,7 +601,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -627,7 +646,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -672,7 +691,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -717,7 +736,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -762,7 +781,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -807,7 +826,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -852,7 +871,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -897,7 +916,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -942,7 +961,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -987,7 +1006,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -1032,7 +1051,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -1077,7 +1096,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -1122,7 +1141,7 @@ namespace romsdownloader.Views
                     ContentList.Add(Games);
 
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    uxLabelStatus.Text = "Loading " + GameName;
+                    statusBarDownloads.Content = "Loading " + GameName;
                 }
 
                 //Next Page
@@ -1149,7 +1168,7 @@ namespace romsdownloader.Views
                 JsonFormat.Export(file, ContentList);
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
-                uxLabelStatus.Text = "Loading Games... DONE!";
+                statusBarDownloads.Content = "Loading Games... DONE!";
                }
             catch
             {
@@ -1179,7 +1198,7 @@ namespace romsdownloader.Views
 
             await Task.Delay(TimeSpan.FromMilliseconds(1));
             uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
-            uxLabelStatus.Text = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();
+            statusBarDownloads.Content = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();
             TransformControls(true);
         }
         #endregion
@@ -1190,7 +1209,7 @@ namespace romsdownloader.Views
             uxComboPlataform.IsEnabled = status;
             uxGamesListView.IsEnabled = status;
             uxTextBoxSearch.IsEnabled = status;
-            uxMainTabPanel.IsEnabled = status;
+            uxMainTabControl.IsEnabled = status;
 
             if (status)
                 uxGamesListView.Visibility = Visibility.Visible;
@@ -1206,8 +1225,169 @@ namespace romsdownloader.Views
             GameList item = (GameList)list.SelectedItem;
             if (item != null)
             {
-                MessageBox.Show(item.Title);
+                //MessageBox.Show(item.Title);
+                string url = item.Url;
+                var Webget = new HtmlWeb();
+                var doc = Webget.Load(url);
+
+                string _downloadlink = string.Empty;
+
+                //Search download button
+                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//a[@id=\"btnDownload\"]"))
+                {
+                    if (node.InnerText.EndsWith("(fast)"))
+                        _downloadlink = Settings.Default.ROMSPEDIA_BASE_URL + node.GetAttributeValue("href", "");
+                }
+
+                //Search download link
+                Webget = new HtmlWeb();
+                doc = Webget.Load(_downloadlink);
+                _downloadlink = string.Empty;
+
+                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"col-12\"]//p//a"))
+                {
+                    if (node.InnerText.Equals("click here"))
+                        _downloadlink = node.GetAttributeValue("href", "");
+                }
+
+
+                WebDownloadClient download = new WebDownloadClient(_downloadlink);
+                download.FileName = item.Title.Trim();
+
+                // Register WebDownloadClient events
+                download.DownloadProgressChanged += download.DownloadProgressChangedHandler;
+                download.DownloadCompleted += download.DownloadCompletedHandler;
+                download.PropertyChanged += this.PropertyChangedHandler;
+                download.StatusChanged += this.StatusChangedHandler;
+                download.DownloadCompleted += this.DownloadCompletedHandler;
+
+                // Create path to temporary file
+                var folder = "Games";
+                Utils.CreateDirectory(folder);
+                string extension = Utils.GetExtensionFromUrl(_downloadlink);
+
+                var realFileName = download.FileName + extension;
+                var filePath = Path.Combine(folder, realFileName);
+                string tempPath = filePath + ".tmp";
+
+                // Check if there is already an ongoing download on that path
+                if (File.Exists(tempPath))
+                {
+                    string message = "There is already a download in progress at the specified path.";
+                    MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Check if the file already exists
+                if (File.Exists(filePath))
+                {
+                    string message = "There is already a file with the same name, do you want to overwrite it? "
+                                   + "If not, please change the file name or download folder.";
+                    MessageBoxResult result = MessageBox.Show(message, "File Name Conflict: " + filePath, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        File.Delete(filePath);
+                    }
+                    else
+                        return;
+                }
+
+                // Check the URL
+                download.CheckUrl();
+                if (download.HasError)
+                    return;
+
+                download.TempDownloadPath = tempPath;
+
+                download.AddedOn = DateTime.UtcNow;
+                download.CompletedOn = DateTime.MinValue;
+                download.OpenFileOnCompletion = false;
+
+                // Add the download to the downloads list
+                DownloadManager.Instance.DownloadsList.Add(download);
+
+                // Start downloading the file
+                download.Start();
+
+                downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
+                uxTabCurrentDownlaods.IsSelected = true;
             }
+        }
+        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            WebDownloadClient download = (WebDownloadClient)sender;
+            if (e.PropertyName == "AverageSpeedAndTotalTime" && download.Status != DownloadStatus.Deleting)
+            {
+                this.Dispatcher.Invoke(new PropertyChangedEventHandler(UpdatePropertiesList), sender, e);
+            }
+        }
+
+        private void UpdatePropertiesList(object sender, PropertyChangedEventArgs e)
+        {
+            propertyValues.RemoveRange(4, 2);
+            var download = (WebDownloadClient)downloadsGrid.SelectedItem;
+            propertyValues.Add(download.AverageDownloadSpeed);
+            propertyValues.Add(download.TotalElapsedTimeString);
+
+            propertiesList.RemoveRange(4, 2);
+            propertiesList.Add(new PropertyModel(propertyNames[4], propertyValues[4]));
+            propertiesList.Add(new PropertyModel(propertyNames[5], propertyValues[5]));
+            //propertiesGrid.Items.Refresh();
+        }
+
+        public void StatusChangedHandler(object sender, EventArgs e)
+        {
+            this.Dispatcher.Invoke(new EventHandler(StatusChanged), sender, e);
+        }
+
+        private void StatusChanged(object sender, EventArgs e)
+        {
+            // Start the first download in the queue, if it exists
+            WebDownloadClient dl = (WebDownloadClient)sender;
+            if (dl.Status == DownloadStatus.Paused || dl.Status == DownloadStatus.Completed
+                || dl.Status == DownloadStatus.Deleted || dl.HasError)
+            {
+                foreach (WebDownloadClient d in DownloadManager.Instance.DownloadsList)
+                {
+                    if (d.Status == DownloadStatus.Queued)
+                    {
+                        d.Start();
+                        break;
+                    }
+                }
+            }
+
+            foreach (WebDownloadClient d in DownloadManager.Instance.DownloadsList)
+            {
+                if (d.Status == DownloadStatus.Downloading)
+                {
+                    d.SpeedLimitChanged = true;
+                }
+            }
+
+            int active = DownloadManager.Instance.ActiveDownloads;
+            int completed = DownloadManager.Instance.CompletedDownloads;
+
+            if (active > 0)
+            {
+                if (completed == 0)
+                    this.statusBarActive.Content = " (" + active + " Active)";
+                else
+                    this.statusBarActive.Content = " (" + active + " Active, ";
+            }
+            else
+                this.statusBarActive.Content = String.Empty;
+
+            if (completed > 0)
+            {
+                if (active == 0)
+                    this.statusBarCompleted.Content = " (" + completed + " Completed)";
+                else
+                    this.statusBarCompleted.Content = completed + " Completed)";
+            }
+            else
+                this.statusBarCompleted.Content = String.Empty;
         }
 
         private void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -1220,6 +1400,18 @@ namespace romsdownloader.Views
             }
             else
                 uxGamesListView.ItemsSource = ContentList;
+        }
+
+        public void DownloadCompletedHandler(object sender, EventArgs e)
+        {
+            WebDownloadClient download = (WebDownloadClient)sender;
+
+            if (download.Status == DownloadStatus.Completed)
+            {
+                string title = "Download Completed! ";
+                string text = title + download.FileName + " has finished downloading.";
+                this.statusBarCompleted.Content = text;
+            }
         }
 
         private async void uxComboPlataform_DropDownClosed(object sender, EventArgs e)

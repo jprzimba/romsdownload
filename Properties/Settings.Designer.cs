@@ -322,5 +322,53 @@ namespace romsdownload.Properties {
                 this["ROMSPEDIA_PATH_MEGA_DRIVE"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public int MemoryCacheSize {
+            get {
+                return ((int)(this["MemoryCacheSize"]));
+            }
+            set {
+                this["MemoryCacheSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int MaxDownloads {
+            get {
+                return ((int)(this["MaxDownloads"]));
+            }
+            set {
+                this["MaxDownloads"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableSpeedLimit {
+            get {
+                return ((bool)(this["EnableSpeedLimit"]));
+            }
+            set {
+                this["EnableSpeedLimit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public int SpeedLimit {
+            get {
+                return ((int)(this["SpeedLimit"]));
+            }
+            set {
+                this["SpeedLimit"] = value;
+            }
+        }
     }
 }

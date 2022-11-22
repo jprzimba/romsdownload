@@ -53,15 +53,15 @@
             <TextBox Margin="0,10,10,10" Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged"/>
         </DockPanel>
 
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Name="uxLabelStatus"/>
-            </StatusBarItem>
+        <StatusBar Height="26" Name="statusBar" DockPanel.Dock="Bottom" VerticalContentAlignment="Center" Background="#FFDFE9F5" BorderBrush="#FFB9C9DA" BorderThickness="1">
+            <StatusBarItem Name="statusBarDownloads" Content="Ready" Padding="10,3,0,3" />
+            <StatusBarItem Name="statusBarActive" Padding="0,3" />
+            <StatusBarItem Name="statusBarCompleted" Padding="0,3" />
         </StatusBar>
-        
-        <TabControl DockPanel.Dock="Top" Name="uxMainTabPanel">
+
+        <TabControl DockPanel.Dock="Top" Name="uxMainTabControl">
             <!-- Game List -->
-            <TabItem Header="Game List">
+            <TabItem Header="Game List" Name="uxTabGameList">
                 <ListView x:Name="uxGamesListView" Padding="4" MouseDoubleClick="uxGamesListView_MouseDoubleClick">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -81,7 +81,7 @@
             </TabItem>
 
             <!-- Downloads -->
-            <TabItem Header="Downloads">
+            <TabItem Header="Downloads" Name="uxTabCurrentDownlaods">
                 <DockPanel Name="downloadsPanel" Background="#FFF9F9F9">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="dgScrollViewer">
                         <DataGrid AutoGenerateColumns="False" Name="downloadsGrid" VerticalContentAlignment="Center" DockPanel.Dock="Top" 
