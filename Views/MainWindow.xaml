@@ -1,7 +1,8 @@
 ﻿<Window x:Class="romsdownloader.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ROMS Download" Height="450" Width="950" BorderBrush="#000000" BorderThickness="1" WindowStartupLocation="CenterScreen">
+        Title="ROMS Download" Height="450" Width="950" BorderBrush="#000000" BorderThickness="1"
+        WindowStartupLocation="CenterScreen">
 
     <DockPanel Name="uxDockPanel">
         <Menu Padding="10" DockPanel.Dock="Top">
@@ -20,7 +21,7 @@
             </Menu>
 
         <DockPanel DockPanel.Dock="Top">
-            <Label Content="Select Game:" Margin="10"></Label>
+            <Label Content="Select Plataform:" Margin="10"></Label>
             <ComboBox Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed">
                 <ComboBoxItem>3DS</ComboBoxItem>
                 <ComboBoxItem>AMIGA</ComboBoxItem>

@@ -1,16 +1,21 @@
-﻿using romsdownload.Properties;
-using System;
+﻿using System;
 using System.IO;
 
 namespace romsdownloader.Classes
 {
     internal class Utils
     {
-        public static void CreateDownloadDirectory()
+        public static bool IsDirectoryCreated(string folder)
         {
-            var dir = Path.Combine(Directory.GetCurrentDirectory(), "Downloads");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            string dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
+            return Directory.Exists(dir);
+        }
+
+        public static void CreateDirectory(string folder)
+        {
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
         }
 
         public static void ExportException(Exception e)
