@@ -6,19 +6,19 @@
 
     <DockPanel Name="uxDockPanel">
         <Menu Padding="10" DockPanel.Dock="Top">
-                <MenuItem Header="File">
-                    <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click"></MenuItem>
-                </MenuItem>
+            <MenuItem Header="File">
+                <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click"></MenuItem>
+            </MenuItem>
 
-                <MenuItem Header="About">
-                    <MenuItem Header="Doname" Name="uxBtnCredits" Click="uxBtnDonate_Click"/>
-                    <Separator/>
-                    <MenuItem Header="Git Hub">
-                        <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click"/>
-                        <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click"/>
-                    </MenuItem>
+            <MenuItem Header="About">
+                <MenuItem Header="Donate" Name="uxBtnCredits" Click="uxBtnDonate_Click"/>
+                <Separator/>
+                <MenuItem Header="Git Hub">
+                    <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click"/>
+                    <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click"/>
                 </MenuItem>
-            </Menu>
+            </MenuItem>
+        </Menu>
 
         <DockPanel DockPanel.Dock="Top">
             <Label Content="Select Plataform:" Margin="10"></Label>
@@ -33,9 +33,9 @@
                 <ComboBoxItem>FAMICOM</ComboBoxItem>
                 <ComboBoxItem>GAME CUBE</ComboBoxItem>
                 <ComboBoxItem>GAME GEAR</ComboBoxItem>
-                <ComboBoxItem>GB</ComboBoxItem>
-                <ComboBoxItem>GBA</ComboBoxItem>
-                <ComboBoxItem>GBC</ComboBoxItem>
+                <ComboBoxItem>GAME BOY</ComboBoxItem>
+                <ComboBoxItem>GAME BOY ADVANCE</ComboBoxItem>
+                <ComboBoxItem>GAME BOY COLOR</ComboBoxItem>
                 <ComboBoxItem>M.A.M.E</ComboBoxItem>
                 <ComboBoxItem>MASTER SYSTEM</ComboBoxItem>
                 <ComboBoxItem>MEGA DRIVE</ComboBoxItem>
