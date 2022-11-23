@@ -56,6 +56,7 @@ namespace romsdownloader.Views
         #region Window Events
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            ContentList = new List<GameList>();
             _ = Task.Delay(TimeSpan.FromMilliseconds(1));
             var folder = "Cache";
             Utils.CreateDirectory(folder);
@@ -76,9 +77,7 @@ namespace romsdownloader.Views
             try
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
-                ContentList = new List<GameList>();
                 statusBarDownloads.Content = "Loading Games... Please Wait!";
-
                 var GameUrlPage = string.Empty;
 
                 //3DS
@@ -1197,7 +1196,9 @@ namespace romsdownloader.Views
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(1));
-            uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
+            ContentList = new List<GameList>();
+            ContentList.AddRange(jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper())));
+            uxGamesListView.ItemsSource = ContentList;
             statusBarDownloads.Content = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();
             TransformControls(true);
         }
@@ -1311,7 +1312,6 @@ namespace romsdownloader.Views
                 download.Start();
 
                 downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
-                uxTabCurrentDownlaods.IsSelected = true;
             }
         }
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
@@ -1390,13 +1390,14 @@ namespace romsdownloader.Views
                 this.statusBarCompleted.Content = String.Empty;
         }
 
-        private void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private async void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             string keyword = uxTextBoxSearch.Text;
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
             if (keyword.Length >= 1)
             {
-                var s = ContentList.Where(c => c.Title.ToLower().Contains(keyword.ToLower()));
-                uxGamesListView.ItemsSource = s;
+                var result = ContentList.Where(c => c.Title.ToUpper().Contains(keyword.ToUpper()));
+                uxGamesListView.ItemsSource = result;
             }
             else
                 uxGamesListView.ItemsSource = ContentList;
