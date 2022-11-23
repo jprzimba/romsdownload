@@ -229,6 +229,19 @@ namespace romsdownloader.Views
         #endregion
 
         #region Window Events
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            string message = "Are you sure you want to exit the application?";
+            MessageBoxResult result = MessageBox.Show(message, "SGet", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            SaveDownloadsToXml();
+        }
+
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             SaveDownloadsToXml();
@@ -1651,6 +1664,9 @@ namespace romsdownloader.Views
         private async void uxComboPlataform_DropDownClosed(object sender, EventArgs e)
         {
             string selectionText = uxComboPlataform.Text.Trim().ToUpper();
+            if (string.IsNullOrEmpty(selectionText))
+                return;
+
             await LoadGames(selectionText);
         }
         #endregion
@@ -1791,18 +1807,5 @@ namespace romsdownloader.Views
             catch { }
         }
         #endregion
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            string message = "Are you sure you want to exit the application?";
-            MessageBoxResult result = MessageBox.Show(message, "SGet", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            SaveDownloadsToXml();
-        }
     }
 }
