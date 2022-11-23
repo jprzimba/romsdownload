@@ -370,5 +370,17 @@ namespace romsdownload.Properties {
                 this["SpeedLimit"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool StartDownloadsOnStartup {
+            get {
+                return ((bool)(this["StartDownloadsOnStartup"]));
+            }
+            set {
+                this["StartDownloadsOnStartup"] = value;
+            }
+        }
     }
 }

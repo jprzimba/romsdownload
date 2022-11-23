@@ -14,6 +14,10 @@ using romsdownloader.Classes;
 using romsdownload.Download;
 using System.ComponentModel;
 using System.Windows.Controls;
+using System.Collections.Specialized;
+using Microsoft.Win32;
+using System.Xml.Linq;
+using System.Net;
 
 namespace romsdownloader.Views
 {
@@ -37,6 +41,14 @@ namespace romsdownloader.Views
         {
             InitializeComponent();
 
+            // Bind DownloadsList to downloadsGrid
+            downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
+            DownloadManager.Instance.DownloadsList.CollectionChanged += new NotifyCollectionChangedEventHandler(DownloadsList_CollectionChanged);
+
+            // In case of computer shutdown or restart, save current list of downloads to an XML file
+            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEvents_SessionEnding);
+
+
             propertyNames = new List<string>();
             propertyNames.Add("URL");
             propertyNames.Add("Supports Resume");
@@ -48,12 +60,180 @@ namespace romsdownloader.Views
             propertyValues = new List<string>();
             propertiesList = new List<PropertyModel>();
 
+            // Load downloads from the XML file
+            LoadDownloadsFromXml();
+
+            if (DownloadManager.Instance.TotalDownloads == 0)
+            {
+                //EnableMenuItems(false);
+
+                var folder = "Games";
+                var dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
+                // Clean temporary files in the download directory if no downloads were loaded
+                if (Directory.Exists(dir))
+                {
+                    DirectoryInfo downloadLocation = new DirectoryInfo(dir);
+                    foreach (FileInfo file in downloadLocation.GetFiles())
+                    {
+                        if (file.FullName.EndsWith(".tmp"))
+                            file.Delete();
+                    }
+                }
+            }
+
             Loaded += WindowLoaded;
             Closed += WindowClosed;
         }
         #endregion
 
+        #region Load & Save
+        private void PauseAllDownloads()
+        {
+            if (downloadsGrid.Items.Count > 0)
+            {
+                foreach (WebDownloadClient download in DownloadManager.Instance.DownloadsList)
+                {
+                    download.Pause();
+                }
+            }
+        }
+
+        private void SaveDownloadsToXml()
+        {
+            if (DownloadManager.Instance.TotalDownloads > 0)
+            {
+                // Pause downloads
+                PauseAllDownloads();
+
+                XElement root = new XElement("downloads");
+
+                foreach (WebDownloadClient download in DownloadManager.Instance.DownloadsList)
+                {
+                    string username = String.Empty;
+                    string password = String.Empty;
+                    if (download.ServerLogin != null)
+                    {
+                        username = download.ServerLogin.UserName;
+                        password = download.ServerLogin.Password;
+                    }
+
+                    XElement xdl = new XElement("download",
+                                        new XElement("file_name", download.FileName),
+                                        new XElement("url", download.Url.ToString()),
+                                        new XElement("username", username),
+                                        new XElement("password", password),
+                                        new XElement("temp_path", download.TempDownloadPath),
+                                        new XElement("file_size", download.FileSize),
+                                        new XElement("downloaded_size", download.DownloadedSize),
+                                        new XElement("status", download.Status.ToString()),
+                                        new XElement("status_text", download.StatusText),
+                                        new XElement("total_time", download.TotalElapsedTime.ToString()),
+                                        new XElement("added_on", download.AddedOn.ToString()),
+                                        new XElement("completed_on", download.CompletedOn.ToString()),
+                                        new XElement("supports_resume", download.SupportsRange.ToString()),
+                                        new XElement("has_error", download.HasError.ToString()),
+                                        new XElement("open_file", download.OpenFileOnCompletion.ToString()),
+                                        new XElement("temp_created", download.TempFileCreated.ToString()),
+                                        new XElement("is_batch", download.IsBatch.ToString()),
+                                        new XElement("url_checked", download.BatchUrlChecked.ToString()));
+                    root.Add(xdl);
+                }
+
+                XDocument xd = new XDocument();
+                xd.Add(root);
+                // Save downloads to XML file
+                xd.Save("Downloads.xml");
+            }
+        }
+
+        private void LoadDownloadsFromXml()
+        {
+            try
+            {
+                if (File.Exists("Downloads.xml"))
+                {
+                    // Load downloads from XML file
+                    XElement downloads = XElement.Load("Downloads.xml");
+                    if (downloads.HasElements)
+                    {
+                        IEnumerable<XElement> downloadsList =
+                            from el in downloads.Elements()
+                            select el;
+                        foreach (XElement download in downloadsList)
+                        {
+                            // Create WebDownloadClient object based on XML data
+                            WebDownloadClient downloadClient = new WebDownloadClient(download.Element("url").Value);
+
+                            downloadClient.FileName = download.Element("file_name").Value;
+
+                            downloadClient.DownloadProgressChanged += downloadClient.DownloadProgressChangedHandler;
+                            downloadClient.DownloadCompleted += downloadClient.DownloadCompletedHandler;
+                            downloadClient.PropertyChanged += this.PropertyChangedHandler;
+                            downloadClient.StatusChanged += this.StatusChangedHandler;
+                            downloadClient.DownloadCompleted += this.DownloadCompletedHandler;
+
+                            string username = download.Element("username").Value;
+                            string password = download.Element("password").Value;
+                            if (username != String.Empty && password != String.Empty)
+                            {
+                                downloadClient.ServerLogin = new NetworkCredential(username, password);
+                            }
+
+                            downloadClient.TempDownloadPath = download.Element("temp_path").Value;
+                            downloadClient.FileSize = Convert.ToInt64(download.Element("file_size").Value);
+                            downloadClient.DownloadedSize = Convert.ToInt64(download.Element("downloaded_size").Value);
+
+                            DownloadManager.Instance.DownloadsList.Add(downloadClient);
+
+                            if (download.Element("status").Value == "Completed")
+                            {
+                                downloadClient.Status = DownloadStatus.Completed;
+                            }
+                            else
+                            {
+                                downloadClient.Status = DownloadStatus.Paused;
+                            }
+
+                            downloadClient.StatusText = download.Element("status_text").Value;
+
+                            downloadClient.ElapsedTime = TimeSpan.Parse(download.Element("total_time").Value);
+                            downloadClient.AddedOn = DateTime.Parse(download.Element("added_on").Value);
+                            downloadClient.CompletedOn = DateTime.Parse(download.Element("completed_on").Value);
+
+                            downloadClient.SupportsRange = Boolean.Parse(download.Element("supports_resume").Value);
+                            downloadClient.HasError = Boolean.Parse(download.Element("has_error").Value);
+                            downloadClient.OpenFileOnCompletion = Boolean.Parse(download.Element("open_file").Value);
+                            downloadClient.TempFileCreated = Boolean.Parse(download.Element("temp_created").Value);
+                            downloadClient.IsBatch = Boolean.Parse(download.Element("is_batch").Value);
+                            downloadClient.BatchUrlChecked = Boolean.Parse(download.Element("url_checked").Value);
+
+                            if (downloadClient.Status == DownloadStatus.Paused && !downloadClient.HasError && Settings.Default.StartDownloadsOnStartup)
+                            {
+                                downloadClient.Start();
+                            }
+                        }
+
+                        // Create empty XML file
+                        XElement root = new XElement("downloads");
+                        XDocument xd = new XDocument();
+                        xd.Add(root);
+                        xd.Save("Downloads.xml");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("There was an error while loading the download list.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        #endregion
+
         #region Window Events
+        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            SaveDownloadsToXml();
+        }
+
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             ContentList = new List<GameList>();
@@ -68,6 +248,31 @@ namespace romsdownloader.Views
         private void WindowClosed(object sender, EventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void uxBtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState != WindowState.Minimized)
+                this.WindowState = WindowState.Minimized;
+        }
+
+        private void uxBtnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
+        }
+
+        private void uxBtnCloseApp_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowClosed(sender, e);
         }
         #endregion
 
@@ -1196,9 +1401,8 @@ namespace romsdownloader.Views
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(1));
-            ContentList = new List<GameList>();
-            ContentList.AddRange(jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper())));
-            uxGamesListView.ItemsSource = ContentList;
+
+            uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
             statusBarDownloads.Content = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();
             TransformControls(true);
         }
@@ -1220,9 +1424,10 @@ namespace romsdownloader.Views
         #endregion
 
         #region Control Events
-        private void uxGamesListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void uxGamesListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            System.Windows.Controls.ListView list = (System.Windows.Controls.ListView)sender;
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            ListView list = (ListView)sender;
             GameList item = (GameList)list.SelectedItem;
             if (item != null)
             {
@@ -1323,6 +1528,16 @@ namespace romsdownloader.Views
             }
         }
 
+        private void DownloadsList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (DownloadManager.Instance.TotalDownloads == 1)
+                this.statusBarDownloads.Content = "1 Download";
+            else if (DownloadManager.Instance.TotalDownloads > 1)
+                this.statusBarDownloads.Content = DownloadManager.Instance.TotalDownloads + " Downloads";
+            else
+                this.statusBarDownloads.Content = "Ready";
+        }
+
         private void UpdatePropertiesList(object sender, PropertyChangedEventArgs e)
         {
             propertyValues.RemoveRange(4, 2);
@@ -1393,14 +1608,32 @@ namespace romsdownloader.Views
         private async void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             string keyword = uxTextBoxSearch.Text;
+            string plataform = uxComboPlataform.Text;
+            if (string.IsNullOrEmpty(plataform))
+                return;
+
             await Task.Delay(TimeSpan.FromMilliseconds(1));
+            var folder = "Cache";
+            var file = Path.Combine(folder, "GameList.json");
+            if (!File.Exists(file))
+            {
+                return;
+            }
+
             if (keyword.Length >= 1)
             {
-                var result = ContentList.Where(c => c.Title.ToUpper().Contains(keyword.ToUpper()));
-                uxGamesListView.ItemsSource = result;
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                var jsonformat = JsonFormat.Import(file);
+
+                if (jsonformat == null)
+                {
+                    MessageBox.Show(this, "Unable to load JSON file.",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Title.ToUpper().Contains(keyword.ToUpper())).Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
             }
-            else
-                uxGamesListView.ItemsSource = ContentList;
         }
 
         public void DownloadCompletedHandler(object sender, EventArgs e)
@@ -1444,6 +1677,7 @@ namespace romsdownloader.Views
         }
         #endregion
 
+        #region Context Menu
         private void uxContextMenuDeleteSelected_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1555,6 +1789,20 @@ namespace romsdownloader.Views
                 }
             }
             catch { }
+        }
+        #endregion
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            string message = "Are you sure you want to exit the application?";
+            MessageBoxResult result = MessageBox.Show(message, "SGet", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            SaveDownloadsToXml();
         }
     }
 }
