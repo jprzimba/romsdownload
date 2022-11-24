@@ -21,7 +21,7 @@ using System.Net;
 
 namespace romsdownloader.Views
 {
-    public partial class MainWindow
+    public partial class MainWindow : Window
     {
         #region Declarations 
         public List<GameList> ContentList { get; private set; }
