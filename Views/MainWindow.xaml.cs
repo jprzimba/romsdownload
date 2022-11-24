@@ -34,6 +34,7 @@ namespace romsdownloader.Views
         private List<string> propertyNames;
         private List<string> propertyValues;
         private List<PropertyModel> propertiesList;
+
         #endregion
 
         #region Constructor
@@ -1625,7 +1626,6 @@ namespace romsdownloader.Views
             if (string.IsNullOrEmpty(plataform))
                 return;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(1));
             var folder = "Cache";
             var file = Path.Combine(folder, "GameList.json");
             if (!File.Exists(file))
@@ -1635,7 +1635,6 @@ namespace romsdownloader.Views
 
             if (keyword.Length >= 1)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
                 var jsonformat = JsonFormat.Import(file);
 
                 if (jsonformat == null)
@@ -1644,6 +1643,7 @@ namespace romsdownloader.Views
                             "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Title.ToUpper().Contains(keyword.ToUpper())).Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
             }

@@ -30,65 +30,73 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="1" Margin="5" Width="40" Height="40" Name="uxBtnMinimize" Click="uxBtnMinimize_Click">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Lest Menu -->
+                        <Menu Grid.Row="0" Grid.Column="0">
+                            <MenuItem Header="File">
+                                <MenuItem.Icon>
+                                    <fa:ImageAwesome Icon="File" Foreground="DimGray"/>
+                                </MenuItem.Icon>
+                                <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click">
+                                    <MenuItem.Icon>
+                                        <fa:ImageAwesome Icon="Close" Foreground="Red"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuItem>
+
+                            <MenuItem Header="Help">
+                                <MenuItem.Icon>
+                                    <fa:ImageAwesome Icon="HandGrabOutline" Foreground="DimGray"/>
+                                </MenuItem.Icon>
+
+                                <MenuItem Header="Donate" Name="uxBtnCredits" Click="uxBtnDonate_Click">
+                                    <MenuItem.Icon>
+                                        <fa:ImageAwesome Icon="Paypal" Foreground="DodgerBlue"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Header="Git Hub">
+                                    <MenuItem.Icon>
+                                        <fa:ImageAwesome Icon="Github" Foreground="DimGray"/>
+                                    </MenuItem.Icon>
+
+                                    <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click">
+                                        <MenuItem.Icon>
+                                            <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click">
+                                        <MenuItem.Icon>
+                                            <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </MenuItem>
+                            </MenuItem>
+                        </Menu>
+
+                        <!-- Control Box -->
+                        <Button Grid.Row="0" Grid.Column="1" Margin="2" Width="40" Height="40" Name="uxBtnMinimize" Click="uxBtnMinimize_Click">
                             <Button.Content>
                                 <fa:ImageAwesome Icon="WindowMinimize" Foreground="WhiteSmoke"/>
                             </Button.Content>
                         </Button>
-                        <Button Grid.Column="2" Margin="5" Width="40" Height="40" Name="uxBtnMaximize" Click="uxBtnMaximize_Click">
+                        <Button Grid.Row="0"  Grid.Column="2" Margin="2" Width="40" Height="40" Name="uxBtnMaximize" Click="uxBtnMaximize_Click">
                             <Button.Content>
                                 <fa:ImageAwesome Icon="WindowMaximize" Foreground="WhiteSmoke"/>
                             </Button.Content>
                         </Button>
-                        <Button Grid.Column="3" Margin="5" Width="40" Height="40" Name="uxBtnCloseApp" Click="uxBtnCloseApp_Click">
+                        <Button Grid.Row="0"  Grid.Column="3" Margin="2" Width="40" Height="40" Name="uxBtnCloseApp" Click="uxBtnCloseApp_Click">
                             <Button.Content>
                                 <fa:ImageAwesome Icon="WindowClose" Foreground="WhiteSmoke"/>
                             </Button.Content>
                         </Button>
                     </Grid>
                 </DockPanel>
-
-                <Menu Padding="10" DockPanel.Dock="Top">
-                    <MenuItem Header="File">
-                        <MenuItem.Icon>
-                            <fa:ImageAwesome Icon="File" Foreground="DimGray"/>
-                        </MenuItem.Icon>
-                        <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click">
-                            <MenuItem.Icon>
-                                <fa:ImageAwesome Icon="Close" Foreground="Red"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </MenuItem>
-
-                    <MenuItem Header="Help">
-                        <MenuItem.Icon>
-                            <fa:ImageAwesome Icon="HandGrabOutline" Foreground="DimGray"/>
-                        </MenuItem.Icon>
-
-                        <MenuItem Header="Donate" Name="uxBtnCredits" Click="uxBtnDonate_Click">
-                            <MenuItem.Icon>
-                                <fa:ImageAwesome Icon="Paypal" Foreground="DodgerBlue"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator/>
-                        <MenuItem Header="Git Hub">
-                            <MenuItem.Icon>
-                                <fa:ImageAwesome Icon="Github" Foreground="DimGray"/>
-                            </MenuItem.Icon>
-
-                            <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click">
-                                <MenuItem.Icon>
-                                    <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click">
-                                <MenuItem.Icon>
-                                    <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                    </MenuItem>
-                </Menu>
 
                 <DockPanel DockPanel.Dock="Top">
                     <fa:ImageAwesome Icon="Gamepad" Foreground="DimGray" Width="40" Margin="10" />
