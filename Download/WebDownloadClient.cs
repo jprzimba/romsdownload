@@ -8,6 +8,8 @@ using System.Net;
 using System.Threading;
 using System.Windows;
 using System;
+using MahApps.Metro.Controls.Dialogs;
+using romsdownloader.Views;
 
 namespace romsdownload.Download
 {
@@ -427,7 +429,7 @@ namespace romsdownload.Download
         #region Methods
 
         // Check URL to get file size, set login and/or proxy server information, check if the server supports the Range header
-        public void CheckUrl()
+        public async void CheckUrl()
         {
             try
             {
@@ -461,15 +463,18 @@ namespace romsdownload.Download
 
                     if (this.FileSize <= 0)
                     {
-                        MessageBox.Show("The requested file does not exist!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        await MainWindow.Instance.ShowMessageAsync(
+                            "Error",
+                                "The requested file does not exist!.");
                         this.HasError = true;
                     }
                 }
             }
             catch (Exception)
             {
-                MessageBox.Show("There was an error while getting the file information. Please make sure the URL is accessible.",
-                                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MainWindow.Instance.ShowMessageAsync(
+                        "Error",
+                            "There is already a download in progress at the specified path.");
                 this.HasError = true;
             }
         }

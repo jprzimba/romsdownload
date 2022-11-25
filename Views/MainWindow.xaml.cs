@@ -18,12 +18,14 @@ using System.Collections.Specialized;
 using Microsoft.Win32;
 using System.Xml.Linq;
 using System.Net;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace romsdownloader.Views
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         #region Declarations 
+        public static MainWindow Instance;
         public List<GameList> ContentList { get; private set; }
         public GameList Games { get; private set; }
         public string GamePlataform { get; private set; }
@@ -35,13 +37,14 @@ namespace romsdownloader.Views
         private List<string> propertyValues;
         private List<PropertyModel> propertiesList;
 
+        private bool _shutdown;
         #endregion
 
         #region Constructor
         public MainWindow()
         {
             InitializeComponent();
-
+            Instance = this;
             // Bind DownloadsList to downloadsGrid
             downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
             DownloadManager.Instance.DownloadsList.CollectionChanged += new NotifyCollectionChangedEventHandler(DownloadsList_CollectionChanged);
@@ -83,8 +86,8 @@ namespace romsdownloader.Views
             }
 
             Loaded += WindowLoaded;
-            Closed += WindowClosed;
         }
+
         #endregion
 
         #region Load & Save
@@ -147,7 +150,7 @@ namespace romsdownloader.Views
             }
         }
 
-        private void LoadDownloadsFromXml()
+        private async void LoadDownloadsFromXml()
         {
             try
             {
@@ -224,25 +227,14 @@ namespace romsdownloader.Views
             }
             catch (Exception)
             {
-                MessageBox.Show("There was an error while loading the download list.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await this.ShowMessageAsync(
+                    "Error",
+                        "There was an error while loading the download list.");
             }
         }
         #endregion
 
         #region Window Events
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            string message = "Are you sure you want to exit the application?";
-            MessageBoxResult result = MessageBox.Show(message, "SGet", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            SaveDownloadsToXml();
-        }
-
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             SaveDownloadsToXml();
@@ -259,34 +251,29 @@ namespace romsdownloader.Views
                 _ = DownloadFile();
         }
 
-        private void WindowClosed(object sender, EventArgs e)
+        private async void Window_Closing(object sender, CancelEventArgs e)
         {
-            Application.Current.Shutdown();
-        }
+            e.Cancel = !_shutdown;
+            if (_shutdown) return;
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
-        }
+            var metroDialogSettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "Quit",
+                NegativeButtonText = "Cancel",
+                AnimateShow = true,
+                AnimateHide = false
+            };
 
-        private void uxBtnMinimize_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.WindowState != WindowState.Minimized)
-                this.WindowState = WindowState.Minimized;
-        }
+            var result = await this.ShowMessageAsync(
+                "Quit application?",
+                    "Sure you want to quit application?",
+                        MessageDialogStyle.AffirmativeAndNegative, metroDialogSettings);
 
-        private void uxBtnMaximize_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.WindowState == WindowState.Maximized)
-                this.WindowState = WindowState.Normal;
-            else
-                this.WindowState = WindowState.Maximized;
-        }
+            _shutdown = result == MessageDialogResult.Affirmative;
 
-        private void uxBtnCloseApp_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowClosed(sender, e);
+            if (_shutdown)
+                Application.Current.Shutdown();
+
         }
         #endregion
 
@@ -1409,8 +1396,9 @@ namespace romsdownloader.Views
 
             if (jsonformat == null)
             {
-                MessageBox.Show(this, "Unable to load JSON file.",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await this.ShowMessageAsync(
+                    "Error",
+                        "Unable to load json file.");
                 return;
             }
 
@@ -1445,7 +1433,6 @@ namespace romsdownloader.Views
             GameList item = (GameList)list.SelectedItem;
             if (item != null)
             {
-                //MessageBox.Show(item.Title);
                 string url = item.Url;
                 var Webget = new HtmlWeb();
                 var doc = Webget.Load(url);
@@ -1493,19 +1480,21 @@ namespace romsdownloader.Views
                 // Check if there is already an ongoing download on that path
                 if (File.Exists(tempPath))
                 {
-                    string message = "There is already a download in progress at the specified path.";
-                    MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await this.ShowMessageAsync(
+                        "Error",
+                            "There is already a download in progress at the specified path.");
                     return;
                 }
 
                 // Check if the file already exists
                 if (File.Exists(filePath))
                 {
-                    string message = "There is already a file with the same name, do you want to overwrite it? "
-                                   + "If not, please change the file name or download folder.";
-                    MessageBoxResult result = MessageBox.Show(message, "File Name Conflict: " + filePath, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var result = await this.ShowMessageAsync(
+                        "Warning", "There is already a file with the same name, do you want to overwrite it? "
+                                   + "If not, please change the file name or download folder.",
+                            MessageDialogStyle.AffirmativeAndNegative);
 
-                    if (result == MessageBoxResult.Yes)
+                    if (result == MessageDialogResult.Affirmative)
                     {
                         File.Delete(filePath);
                     }
@@ -1639,8 +1628,9 @@ namespace romsdownloader.Views
 
                 if (jsonformat == null)
                 {
-                    MessageBox.Show(this, "Unable to load JSON file.",
-                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await this.ShowMessageAsync(
+                        "Error",
+                            "Unable to load json file.");
                     return;
                 }
 
@@ -1694,17 +1684,18 @@ namespace romsdownloader.Views
         #endregion
 
         #region Context Menu
-        private void uxContextMenuDeleteSelected_Click(object sender, RoutedEventArgs e)
+        private async void uxContextMenuDeleteSelected_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (downloadsGrid.SelectedItems.Count > 0)
                 {
-                    MessageBoxResult result = MessageBoxResult.None;
-                    string message = "Are you sure you want to delete the selected download(s)?";
-                    result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var result = await
+                        this.ShowMessageAsync(
+                            "Warning", "Are you sure you want to delete the selected download(s)?",
+                            MessageDialogStyle.AffirmativeAndNegative);
 
-                    if (result == MessageBoxResult.Yes)
+                    if (result == MessageDialogResult.Affirmative)
                     {
                         var selectedDownloads = downloadsGrid.SelectedItems.Cast<WebDownloadClient>();
                         var downloadsToDelete = new List<WebDownloadClient>();

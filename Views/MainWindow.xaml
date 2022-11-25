@@ -1,210 +1,141 @@
-﻿<Window x:Class="romsdownloader.Views.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:fa="http://schemas.fontawesome.io/icons/"
-        mc:Ignorable="d"
-        Title="ROMS Download" Height="700" Width="1140"
-        WindowStartupLocation="CenterScreen"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
-        TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="Auto"
-        Background="{x:Null}"
-        AllowsTransparency="True"
-        WindowStyle="None"
-        FontFamily="{DynamicResource MaterialDesignFont}"
-        MouseDown="Window_MouseDown" Closing="Window_Closing">
+﻿<Controls:MetroWindow x:Class="romsdownloader.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:fa="http://schemas.fontawesome.io/icons/"
+    Title="ROMS Download" Height="450" Width="950"
+    WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Click="uxBtnDonate_Click">
+                <StackPanel Orientation="Horizontal">
+                    <fa:ImageAwesome Icon="Paypal" Foreground="DodgerBlue" Width="25" Margin="5" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Donate" />
+                </StackPanel>
+            </Button>
+            <Button Click="uxBtnGitHubProject_Click">
+                <StackPanel Orientation="Horizontal">
+                    <fa:ImageAwesome Icon="GithubSquare" Foreground="WhiteSmoke" Width="25" Margin="5" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Github" />
+                </StackPanel>
+            </Button>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
 
     <Grid>
-        <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}" UniformCornerRadius="15" Margin="2" materialDesign:ShadowAssist.ShadowDepth="Depth4">
-            <DockPanel Name="uxDockPanel">
-                <DockPanel DockPanel.Dock="Top">
-                    <Grid Margin="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="400*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
-                            <RowDefinition Height="40"/>
-                        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-                        <!-- Lest Menu -->
-                        <Menu Grid.Row="0" Grid.Column="0">
-                            <MenuItem Header="File">
-                                <MenuItem.Icon>
-                                    <fa:ImageAwesome Icon="File" Foreground="DimGray"/>
-                                </MenuItem.Icon>
-                                <MenuItem Header="Exit" Name="uxBtnExit" Click="uxBtnExit_Click">
-                                    <MenuItem.Icon>
-                                        <fa:ImageAwesome Icon="Close" Foreground="Red"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </MenuItem>
+         <fa:ImageAwesome Icon="Gamepad" Foreground="DimGray" Width="40" Margin="10" Grid.Row="0" Grid.Column="0"/>
+        <ComboBox Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed" Grid.Row="0" Grid.Column="1">
+            <ComboBoxItem>3DS</ComboBoxItem>
+            <ComboBoxItem>AMIGA</ComboBoxItem>
+            <ComboBoxItem>ATARI 2600</ComboBoxItem>
+            <ComboBoxItem>ATARI 5200</ComboBoxItem>
+            <ComboBoxItem>ATARI 7800</ComboBoxItem>
+            <ComboBoxItem>ATARI JAGUAR</ComboBoxItem>
+            <ComboBoxItem>DREAMCAST</ComboBoxItem>
+            <ComboBoxItem>FAMICOM</ComboBoxItem>
+            <ComboBoxItem>GAME CUBE</ComboBoxItem>
+            <ComboBoxItem>GAME GEAR</ComboBoxItem>
+            <ComboBoxItem>GAME BOY</ComboBoxItem>
+            <ComboBoxItem>GAME BOY ADVANCE</ComboBoxItem>
+            <ComboBoxItem>GAME BOY COLOR</ComboBoxItem>
+            <ComboBoxItem>M.A.M.E</ComboBoxItem>
+            <ComboBoxItem>MASTER SYSTEM</ComboBoxItem>
+            <ComboBoxItem>MEGA DRIVE</ComboBoxItem>
+            <ComboBoxItem>N64</ComboBoxItem>
+            <ComboBoxItem>NDS</ComboBoxItem>
+            <ComboBoxItem>NES</ComboBoxItem>
+            <ComboBoxItem>PSX</ComboBoxItem>
+            <ComboBoxItem>PS2</ComboBoxItem>
+            <ComboBoxItem>PSP</ComboBoxItem>
+            <ComboBoxItem>SNES</ComboBoxItem>
+            <ComboBoxItem>WII</ComboBoxItem>
+        </ComboBox>
 
-                            <MenuItem Header="Help">
-                                <MenuItem.Icon>
-                                    <fa:ImageAwesome Icon="HandGrabOutline" Foreground="DimGray"/>
-                                </MenuItem.Icon>
+        <fa:ImageAwesome Icon="Search" Foreground="DimGray" Width="25" Margin="10" Grid.Row="0" Grid.Column="2"/>
+        <TextBox Margin="0,10,10,10" Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged" Grid.Row="0" Grid.Column="3"/>
 
-                                <MenuItem Header="Donate" Name="uxBtnCredits" Click="uxBtnDonate_Click">
-                                    <MenuItem.Icon>
-                                        <fa:ImageAwesome Icon="Paypal" Foreground="DodgerBlue"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator/>
-                                <MenuItem Header="Git Hub">
-                                    <MenuItem.Icon>
-                                        <fa:ImageAwesome Icon="Github" Foreground="DimGray"/>
-                                    </MenuItem.Icon>
+        <TabControl Name="uxMainTabControl" Grid.Row="1" Grid.ColumnSpan="4" Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
+            <!-- Game List -->
+            <TabItem Header="Games" Name="uxTabGameList">
+                <ListView x:Name="uxGamesListView" MouseDoubleClick="uxGamesListView_MouseDoubleClick">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="5"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
 
-                                    <MenuItem Header="Project" Name="uxBtnGitHubProject" Click="uxBtnGitHubProject_Click">
-                                        <MenuItem.Icon>
-                                            <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Issues" Name="uxBtnGitHubIssues" Click="uxBtnGitHubIssues_Click">
-                                        <MenuItem.Icon>
-                                            <fa:ImageAwesome Icon="Link" Foreground="DimGray"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </MenuItem>
-                            </MenuItem>
-                        </Menu>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <Image Margin="4" Source="{Binding Image}" Width="245" Height="140"/>
+                                <Label Margin="4" Content="{Binding Title}" Width="245" Height="30" HorizontalContentAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListView>
+            </TabItem>
 
-                        <!-- Control Box -->
-                        <Button Grid.Row="0" Grid.Column="1" Margin="2" Width="40" Height="40" Name="uxBtnMinimize" Click="uxBtnMinimize_Click">
-                            <Button.Content>
-                                <fa:ImageAwesome Icon="WindowMinimize" Foreground="WhiteSmoke"/>
-                            </Button.Content>
-                        </Button>
-                        <Button Grid.Row="0"  Grid.Column="2" Margin="2" Width="40" Height="40" Name="uxBtnMaximize" Click="uxBtnMaximize_Click">
-                            <Button.Content>
-                                <fa:ImageAwesome Icon="WindowMaximize" Foreground="WhiteSmoke"/>
-                            </Button.Content>
-                        </Button>
-                        <Button Grid.Row="0"  Grid.Column="3" Margin="2" Width="40" Height="40" Name="uxBtnCloseApp" Click="uxBtnCloseApp_Click">
-                            <Button.Content>
-                                <fa:ImageAwesome Icon="WindowClose" Foreground="WhiteSmoke"/>
-                            </Button.Content>
-                        </Button>
-                    </Grid>
-                </DockPanel>
-
-                <DockPanel DockPanel.Dock="Top">
-                    <fa:ImageAwesome Icon="Gamepad" Foreground="DimGray" Width="40" Margin="10" />
-                    <ComboBox Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed">
-                        <ComboBoxItem>3DS</ComboBoxItem>
-                        <ComboBoxItem>AMIGA</ComboBoxItem>
-                        <ComboBoxItem>ATARI 2600</ComboBoxItem>
-                        <ComboBoxItem>ATARI 5200</ComboBoxItem>
-                        <ComboBoxItem>ATARI 7800</ComboBoxItem>
-                        <ComboBoxItem>ATARI JAGUAR</ComboBoxItem>
-                        <ComboBoxItem>DREAMCAST</ComboBoxItem>
-                        <ComboBoxItem>FAMICOM</ComboBoxItem>
-                        <ComboBoxItem>GAME CUBE</ComboBoxItem>
-                        <ComboBoxItem>GAME GEAR</ComboBoxItem>
-                        <ComboBoxItem>GAME BOY</ComboBoxItem>
-                        <ComboBoxItem>GAME BOY ADVANCE</ComboBoxItem>
-                        <ComboBoxItem>GAME BOY COLOR</ComboBoxItem>
-                        <ComboBoxItem>M.A.M.E</ComboBoxItem>
-                        <ComboBoxItem>MASTER SYSTEM</ComboBoxItem>
-                        <ComboBoxItem>MEGA DRIVE</ComboBoxItem>
-                        <ComboBoxItem>N64</ComboBoxItem>
-                        <ComboBoxItem>NDS</ComboBoxItem>
-                        <ComboBoxItem>NES</ComboBoxItem>
-                        <ComboBoxItem>PSX</ComboBoxItem>
-                        <ComboBoxItem>PS2</ComboBoxItem>
-                        <ComboBoxItem>PSP</ComboBoxItem>
-                        <ComboBoxItem>SNES</ComboBoxItem>
-                        <ComboBoxItem>WII</ComboBoxItem>
-                    </ComboBox>
-
-                    <fa:ImageAwesome Icon="Search" Foreground="DimGray" Width="25" Margin="10" />
-                    <TextBox Margin="0,10,10,10" Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged"/>
-                </DockPanel>
-
-                <StatusBar Height="26" Name="statusBar" DockPanel.Dock="Bottom" VerticalContentAlignment="Center">
-                    <StatusBarItem Name="statusBarDownloads" Content="Ready" Padding="10,3,0,3" />
-                    <StatusBarItem Name="statusBarActive" Padding="0,3" />
-                    <StatusBarItem Name="statusBarCompleted" Padding="0,3" />
-                </StatusBar>
-
-                <TabControl DockPanel.Dock="Top" Name="uxMainTabControl">
-                    <!-- Game List -->
-                    <TabItem Header="Game List" Name="uxTabGameList">
-                        <ListView x:Name="uxGamesListView"
-                              MouseDoubleClick="uxGamesListView_MouseDoubleClick"
-                              Style="{DynamicResource MaterialDesignCardsListBox}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="5"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Vertical">
-                                        <Image Margin="4" Source="{Binding Image}" Width="245" Height="140"/>
-                                        <Label Margin="4" Content="{Binding Title}" Width="245" Height="30" HorizontalContentAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListView>
-                    </TabItem>
-
-                    <!-- Downloads -->
-                    <TabItem Header="Downloads" Name="uxTabCurrentDownlaods">
-                        <DockPanel Name="downloadsPanel">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="dgScrollViewer">
-                                <DataGrid AutoGenerateColumns="False" Name="downloadsGrid" VerticalContentAlignment="Center" DockPanel.Dock="Top" 
+            <!-- Downloads -->
+            <TabItem Header="Downloads" Name="uxTabCurrentDownlaods">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="dgScrollViewer">
+                    <DataGrid AutoGenerateColumns="False" Name="downloadsGrid" VerticalContentAlignment="Center"
                             BorderThickness="0" IsReadOnly="True" GridLinesVisibility="None" MinRowHeight="22" 
                             CanUserResizeRows="False">
-                                    <DataGrid.CellStyle>
-                                        <Style TargetType="DataGridCell">
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                        </Style>
-                                    </DataGrid.CellStyle>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="File Name" CellStyle="{StaticResource LeftCellStyle}" MinWidth="150" Width="150" x:Name="tcFileName" Binding="{Binding FileName, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Size" HeaderStyle="{StaticResource  MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="80" Width="80" x:Name="tcSize" Binding="{Binding FileSizeString, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Downloaded" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="130" Width="130" x:Name="tcDownloaded" Binding="{Binding DownloadedSizeString, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Percent" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="130" Width="130" x:Name="tcPercent" Binding="{Binding PercentString, Mode=OneWay}" />
-                                        <DataGridTemplateColumn Header="Progress" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="130" Width="130" x:Name="tcProgress">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <ProgressBar Name="progressBar" Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center" Height="16" MinHeight="16" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                        <DataGridTextColumn Header="Speed" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="85" Width="85" x:Name="tcSpeed" Binding="{Binding DownloadSpeed, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Time Left" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="140" Width="140" x:Name="tcTimeLeft" Binding="{Binding TimeLeft, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Status" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="110" Width="110" x:Name="tcStatus" Binding="{Binding StatusString, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Added On" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="140" Width="140" x:Name="tcAddedOn" Binding="{Binding AddedOnString, Mode=OneWay}" />
-                                        <DataGridTextColumn Header="Completed On" HeaderStyle="{StaticResource MaterialDesignDataGridColumnHeader}" CellStyle="{StaticResource MaterialDesignDataGridCell}" MinWidth="140" Width="140" x:Name="tcCompletedOn" Binding="{Binding CompletedOnString, Mode=OneWay}" />
-                                    </DataGrid.Columns>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="File Name" MinWidth="150" Width="150" x:Name="tcFileName" Binding="{Binding FileName, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Size" MinWidth="80" Width="80" x:Name="tcSize" Binding="{Binding FileSizeString, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Downloaded" MinWidth="110" Width="110" x:Name="tcDownloaded" Binding="{Binding DownloadedSizeString, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Percent" MinWidth="80" Width="80" x:Name="tcPercent" Binding="{Binding PercentString, Mode=OneWay}" />
+                            <DataGridTemplateColumn Header="Progress" MinWidth="130" Width="130" x:Name="tcProgress">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ProgressBar Name="progressBar" Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center" Height="16" MinHeight="16" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Speed" MinWidth="85" Width="85" x:Name="tcSpeed" Binding="{Binding DownloadSpeed, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Time Left" MinWidth="90" Width="90" x:Name="tcTimeLeft" Binding="{Binding TimeLeft, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Status" MinWidth="95" Width="95" x:Name="tcStatus" Binding="{Binding StatusString, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Added On" MinWidth="130" Width="130" x:Name="tcAddedOn" Binding="{Binding AddedOnString, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Completed On" MinWidth="130" Width="130" x:Name="tcCompletedOn" Binding="{Binding CompletedOnString, Mode=OneWay}" />
+                        </DataGrid.Columns>
 
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu Style="{StaticResource MaterialDesignContextMenu}">
-                                            <MenuItem Header="Pause" Name="uxContextMenuPlayPause" Click="uxContextMenuPlayPause_Click" Style="{StaticResource MaterialDesignMenuItem}"/>
-                                            <Separator Style="{StaticResource MaterialDesignSeparator}"/>
-                                            <MenuItem Header="Delete Selected" Name="uxContextMenuDeleteSelected" Click="uxContextMenuDeleteSelected_Click" Style="{StaticResource MaterialDesignMenuItem}"/>
-                                            <MenuItem Header="Clear Completeds" Name="uxContextMenuClearCompleteds" Click="uxContextMenuClearCompleteds_Click" Style="{StaticResource MaterialDesignMenuItem}"/>
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                </DataGrid>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </TabItem>
-                </TabControl>
-            </DockPanel>
-        </materialDesign:Card>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Pause" Name="uxContextMenuPlayPause" Click="uxContextMenuPlayPause_Click"/>
+                                <Separator/>
+                                <MenuItem Header="Delete Selected" Name="uxContextMenuDeleteSelected" Click="uxContextMenuDeleteSelected_Click"/>
+                                <MenuItem Header="Clear Completeds" Name="uxContextMenuClearCompleteds" Click="uxContextMenuClearCompleteds_Click"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <StatusBar Height="26" Name="statusBar" VerticalContentAlignment="Center" Grid.Row="2" Grid.ColumnSpan="4">
+            <StatusBarItem Name="statusBarDownloads" Content="Ready" Padding="10,3,0,3" />
+            <StatusBarItem Name="statusBarActive" Padding="0,3" />
+            <StatusBarItem Name="statusBarCompleted" Padding="0,3" />
+        </StatusBar>
     </Grid>
-</Window>
+</Controls:MetroWindow>
