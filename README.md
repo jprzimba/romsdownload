@@ -3,6 +3,12 @@
 
  ROMS Download is a software designed so that users can download game ROMS from a website called [ROMS Pedia](https://www.romspedia.com).
 
+### Preview
+![Game List](images/01.png)
+![Download List](images/02.png)
+![Download Menu](images/03.png)
+![Cancel Download Confirmation](images/04.png)
+
 ### Credits
 - [Html Agility Pack (HAP)](https://html-agility-pack.net/).
 - [markodt](https://github.com/markodt) (https://github.com/SGet).
