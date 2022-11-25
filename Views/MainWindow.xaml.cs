@@ -1679,7 +1679,7 @@ namespace romsdownloader.Views
 
         private void uxBtnDonate_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://paypal.com");
+            Process.Start("https://www.paypal.com/donate/?business=XKPHGJJSTE2RQ&no_recurring=0&currency_code=BRL");
         }
 
         private void uxBtnGitHubProject_Click(object sender, RoutedEventArgs e)

@@ -141,7 +141,6 @@
                     <!-- Game List -->
                     <TabItem Header="Game List" Name="uxTabGameList">
                         <ListView x:Name="uxGamesListView"
-                              Padding="4"
                               MouseDoubleClick="uxGamesListView_MouseDoubleClick"
                               Style="{DynamicResource MaterialDesignCardsListBox}">
                             <ItemsControl.ItemsPanel>
