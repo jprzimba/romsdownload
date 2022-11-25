@@ -15,7 +15,7 @@
 - [Mah Aapps](https://mahapps.com/).
 - [Font Awesome WPF](https://github.com/charri/Font-Awesome-WPF).
 
- ### Donate
+### Donate
 
 If you live in Brazil and liked the project's initiative, you can make a donation via PIX to the following email: jprzimba@gmail.com
 You can also donate via [PayPal](https://www.paypal.com/donate/?business=XKPHGJJSTE2RQ&no_recurring=0&currency_code=BRL)

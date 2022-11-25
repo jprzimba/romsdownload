@@ -1662,11 +1662,6 @@ namespace romsdownloader.Views
         #endregion
 
         #region Menu
-        private void uxBtnExit_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
         private void uxBtnDonate_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("https://www.paypal.com/donate/?business=XKPHGJJSTE2RQ&no_recurring=0&currency_code=BRL");
@@ -1676,11 +1671,6 @@ namespace romsdownloader.Views
         {
             Process.Start("https://github.com/tryller/romsdownload");
         }
-
-        private void uxBtnGitHubIssues_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start("https://github.com/tryller/romsdownload/issues");
-        }
         #endregion
 
         #region Context Menu
@@ -1688,11 +1678,13 @@ namespace romsdownloader.Views
         {
             try
             {
+                var cellInfo = downloadsGrid.SelectedCells[0];//Cell Index
+                var content = (cellInfo.Column.GetCellContent(cellInfo.Item) as TextBlock).Text;
                 if (downloadsGrid.SelectedItems.Count > 0)
                 {
                     var result = await
                         this.ShowMessageAsync(
-                            "Warning", "Are you sure you want to delete the selected download(s)?",
+                            "Warning", "Are you sure you want to delete " + content.ToString()+ "?",
                             MessageDialogStyle.AffirmativeAndNegative);
 
                     if (result == MessageDialogResult.Affirmative)
