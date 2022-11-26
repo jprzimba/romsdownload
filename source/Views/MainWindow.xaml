@@ -8,12 +8,34 @@
 
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
+            <Button x:Name="uxBtnGameList" Click="uxBtnGameList_Click">
+                <StackPanel Orientation="Horizontal">
+                    <fa:ImageAwesome Icon="Gamepad" Foreground="WhiteSmoke" Width="25" Margin="5" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Games" />
+                </StackPanel>
+            </Button>
+ 
+            <Button x:Name="uxBtnDownloadList" Click="uxBtnDownloadList_Click">
+                <StackPanel Orientation="Horizontal">
+                    <fa:ImageAwesome Icon="Download" Foreground="WhiteSmoke" Width="25" Margin="5" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Downloads" />
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="uxBtnSettings" Click="uxBtnSettings_Click">
+                <StackPanel Orientation="Horizontal">
+                    <fa:ImageAwesome Icon="Gears" Foreground="WhiteSmoke" Width="25" Margin="5" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Settings" />
+                </StackPanel>
+            </Button>
+
             <Button Click="uxBtnDonate_Click">
                 <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="Paypal" Foreground="DodgerBlue" Width="25" Margin="5" />
+                    <fa:ImageAwesome Icon="Paypal" Foreground="WhiteSmoke" Width="25" Margin="5" />
                     <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Donate" />
                 </StackPanel>
             </Button>
+ 
             <Button Click="uxBtnGitHubProject_Click">
                 <StackPanel Orientation="Horizontal">
                     <fa:ImageAwesome Icon="GithubSquare" Foreground="WhiteSmoke" Width="25" Margin="5" />
@@ -37,8 +59,8 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-         <fa:ImageAwesome Icon="Gamepad" Foreground="DimGray" Width="40" Margin="10" Grid.Row="0" Grid.Column="0"/>
-        <ComboBox Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed" Grid.Row="0" Grid.Column="1">
+        <fa:ImageAwesome Icon="Gamepad" Foreground="DimGray" Width="40" Margin="10" Grid.Row="0" Grid.Column="0"/>
+        <ComboBox x:Name="uxComboPlataform" Width="200" Margin="10" DropDownClosed="uxComboPlataform_DropDownClosed" Grid.Row="0" Grid.Column="1">
             <ComboBoxItem>3DS</ComboBoxItem>
             <ComboBoxItem>AMIGA</ComboBoxItem>
             <ComboBoxItem>ATARI 2600</ComboBoxItem>
@@ -66,11 +88,11 @@
         </ComboBox>
 
         <fa:ImageAwesome Icon="Search" Foreground="DimGray" Width="25" Margin="10" Grid.Row="0" Grid.Column="2"/>
-        <TextBox Margin="0,10,10,10" Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged" Grid.Row="0" Grid.Column="3"/>
+        <TextBox Margin="0,10,10,10" x:Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged" Grid.Row="0" Grid.Column="3"/>
 
-        <TabControl Name="uxMainTabControl" Grid.Row="1" Grid.ColumnSpan="4" Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
+        <TabControl x:Name="uxMainTabControl" Grid.Row="1" Grid.ColumnSpan="4" Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
             <!-- Game List -->
-            <TabItem Header="Games" Name="uxTabGameList">
+            <TabItem Header="Games" x:Name="uxTabGameList">
                 <ListView x:Name="uxGamesListView" MouseDoubleClick="uxGamesListView_MouseDoubleClick">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -90,9 +112,9 @@
             </TabItem>
 
             <!-- Downloads -->
-            <TabItem Header="Downloads" Name="uxTabCurrentDownlaods">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="dgScrollViewer">
-                    <DataGrid AutoGenerateColumns="False" Name="downloadsGrid" VerticalContentAlignment="Center"
+            <TabItem Header="Downloads" x:Name="uxTabCurrentDownlaods">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="dgScrollViewer">
+                    <DataGrid AutoGenerateColumns="False" x:Name="downloadsGrid" VerticalContentAlignment="Center"
                             BorderThickness="0" IsReadOnly="True" GridLinesVisibility="None" MinRowHeight="22" 
                             CanUserResizeRows="False">
                         <DataGrid.CellStyle>
@@ -108,7 +130,7 @@
                             <DataGridTemplateColumn Header="Progress" MinWidth="130" Width="130" x:Name="tcProgress">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ProgressBar Name="progressBar" Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center" Height="16" MinHeight="16" />
+                                        <ProgressBar x:Name="progressBar" Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center" Height="16" MinHeight="16" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -121,10 +143,10 @@
 
                         <DataGrid.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Pause" Name="uxContextMenuPlayPause" Click="uxContextMenuPlayPause_Click"/>
+                                <MenuItem Header="Pause" x:Name="uxContextMenuPlayPause" Click="uxContextMenuPlayPause_Click"/>
                                 <Separator/>
-                                <MenuItem Header="Delete Selected" Name="uxContextMenuDeleteSelected" Click="uxContextMenuDeleteSelected_Click"/>
-                                <MenuItem Header="Clear Completeds" Name="uxContextMenuClearCompleteds" Click="uxContextMenuClearCompleteds_Click"/>
+                                <MenuItem Header="Delete Selected" x:Name="uxContextMenuDeleteSelected" Click="uxContextMenuDeleteSelected_Click"/>
+                                <MenuItem Header="Clear Completeds" x:Name="uxContextMenuClearCompleteds" Click="uxContextMenuClearCompleteds_Click"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
@@ -132,10 +154,10 @@
             </TabItem>
         </TabControl>
 
-        <StatusBar Height="26" Name="statusBar" VerticalContentAlignment="Center" Grid.Row="2" Grid.ColumnSpan="4">
-            <StatusBarItem Name="statusBarDownloads" Content="Ready" Padding="10,3,0,3" />
-            <StatusBarItem Name="statusBarActive" Padding="0,3" />
-            <StatusBarItem Name="statusBarCompleted" Padding="0,3" />
+        <StatusBar Height="26" x:Name="statusBar" VerticalContentAlignment="Center" Grid.Row="2" Grid.ColumnSpan="4">
+            <StatusBarItem x:Name="statusBarDownloads" Content="Ready" Padding="10,3,0,3" />
+            <StatusBarItem x:Name="statusBarActive" Padding="0,3" />
+            <StatusBarItem x:Name="statusBarCompleted" Padding="0,3" />
         </StatusBar>
     </Grid>
 </Controls:MetroWindow>

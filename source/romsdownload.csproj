@@ -84,7 +84,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\JsonFormat.cs" />
-    <Compile Include="Classes\Utils.cs" />
+    <Compile Include="Classes\Utility.cs" />
+    <Compile Include="Data\Directories.cs" />
+    <Compile Include="Views\Settings\General.xaml.cs">
+      <DependentUpon>General.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -93,6 +97,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Config.cs" />
     <Compile Include="Download\DownloadManager.cs" />
     <Compile Include="Download\DownloadStatus.cs" />
     <Compile Include="Download\ThrottledStream.cs" />
@@ -106,6 +111,10 @@
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Settings\General.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -137,21 +146,14 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\config.xml" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\about.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\clear.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\delete.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

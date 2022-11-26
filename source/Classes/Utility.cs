@@ -1,17 +1,59 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Xml.Serialization;
 
 namespace romsdownloader.Classes
 {
-    internal class Utils
+    internal class Utility
     {
         private NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
+
+        public static void CreateFileFromResource(string path, string resource, bool overwrite = false)
+        {
+            if (!overwrite && File.Exists(path))
+            {
+                return;
+            }
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource))
+            {
+                if (stream != null)
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        using (var sw = new StreamWriter(path, false, Encoding.UTF8))
+                        {
+                            sw.Write(reader.ReadToEnd());
+                        }
+                    }
+                }
+            }
+        }
 
         public static bool IsDirectoryCreated(string folder)
         {
             string dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
             return Directory.Exists(dir);
+        }
+
+        public static void MapClassToXmlFile(Type type, object obj, string path)
+        {
+            var serializer = new XmlSerializer(type);
+            using (var sw = new StreamWriter(path, false, Encoding.UTF8))
+            {
+                serializer.Serialize(sw, obj);
+            }
+        }
+
+        public static object MapXmlFileToClass(Type type, string path)
+        {
+            var serializer = new XmlSerializer(type);
+            using (var reader = new StreamReader(path, Encoding.UTF8))
+            {
+                return serializer.Deserialize(reader);
+            }
         }
 
         public static void CreateDirectory(string folder)

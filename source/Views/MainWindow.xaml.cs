@@ -19,6 +19,8 @@ using Microsoft.Win32;
 using System.Xml.Linq;
 using System.Net;
 using MahApps.Metro.Controls.Dialogs;
+using romsdownload.Views.Settings;
+using romsdownload.Data;
 
 namespace romsdownloader.Views
 {
@@ -244,8 +246,12 @@ namespace romsdownloader.Views
         {
             ContentList = new List<GameList>();
             _ = Task.Delay(TimeSpan.FromMilliseconds(1));
+
+            uxTabGameList.Visibility = Visibility.Hidden;
+            uxTabCurrentDownlaods.Visibility = Visibility.Hidden;
+
             var folder = "Cache";
-            Utils.CreateDirectory(folder);
+            Utility.CreateDirectory(folder);
             var file = Path.Combine(folder, "GameList.json");
             if (!File.Exists(file))
                 _ = DownloadFile();
@@ -272,7 +278,19 @@ namespace romsdownloader.Views
             _shutdown = result == MessageDialogResult.Affirmative;
 
             if (_shutdown)
+            {
+                try
+                {
+                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+                }
+                catch
+                {
+                    await this.ShowMessageAsync(
+                        "Error",
+                            "Could not write to config.xml.");
+                }
                 Application.Current.Shutdown();
+            }
 
         }
         #endregion
@@ -1368,7 +1386,7 @@ namespace romsdownloader.Views
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 var folder = "Cache";
-                Utils.CreateDirectory(folder);
+                Utility.CreateDirectory(folder);
                 var file = Path.Combine(folder, "GameList.json");
                 JsonFormat.Export(file, ContentList);
 
@@ -1470,8 +1488,8 @@ namespace romsdownloader.Views
 
                 // Create path to temporary file
                 var folder = "Games";
-                Utils.CreateDirectory(folder);
-                string extension = Utils.GetExtensionFromUrl(_downloadlink);
+                Utility.CreateDirectory(folder);
+                string extension = Utility.GetExtensionFromUrl(_downloadlink);
 
                 var realFileName = download.FileName + extension;
                 var filePath = Path.Combine(folder, realFileName);
@@ -1790,5 +1808,29 @@ namespace romsdownloader.Views
             catch { }
         }
         #endregion
+
+        private void uxBtnGameList_Click(object sender, RoutedEventArgs e)
+        {
+            uxMainTabControl.SelectedIndex = 0;
+        }
+
+        private void uxBtnDownloadList_Click(object sender, RoutedEventArgs e)
+        {
+            uxMainTabControl.SelectedIndex = 1;
+        }
+
+        private void uxBtnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (General.Instance == null)
+            {
+                General.Instance = new General();
+                General.Instance.Show();
+                General.Instance.Closed += (o, a) => { General.Instance = null; };
+            }
+            else if (General.Instance != null && !General.Instance.IsActive)
+            {
+                General.Instance.Activate();
+            }
+        }
     }
 }
