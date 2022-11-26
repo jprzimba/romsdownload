@@ -21,6 +21,10 @@ using System.Net;
 using MahApps.Metro.Controls.Dialogs;
 using romsdownload.Views.Settings;
 using romsdownload.Data;
+using System.Windows.Forms;
+using ListView = System.Windows.Controls.ListView;
+using Application = System.Windows.Application;
+using ControlzEx.Standard;
 
 namespace romsdownloader.Views
 {
@@ -1451,6 +1455,13 @@ namespace romsdownloader.Views
             GameList item = (GameList)list.SelectedItem;
             if (item != null)
             {
+                //Select folder to downlaod
+                FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+                folderBrowserDialog.Description = "Choose Download Folder";
+                folderBrowserDialog.ShowNewFolderButton = true;
+                folderBrowserDialog.SelectedPath = Config.Instance.DownloadPath;
+                DialogResult dialogResult = folderBrowserDialog.ShowDialog();
+
                 string url = item.Url;
                 var Webget = new HtmlWeb();
                 var doc = Webget.Load(url);
@@ -1475,7 +1486,6 @@ namespace romsdownloader.Views
                         _downloadlink = node.GetAttributeValue("href", "");
                 }
 
-
                 WebDownloadClient download = new WebDownloadClient(_downloadlink);
                 download.FileName = item.Title.Trim();
 
@@ -1487,59 +1497,76 @@ namespace romsdownloader.Views
                 download.DownloadCompleted += this.DownloadCompletedHandler;
 
                 // Create path to temporary file
-                var folder = "Games";
-                Utility.CreateDirectory(folder);
-                string extension = Utility.GetExtensionFromUrl(_downloadlink);
-
-                var realFileName = download.FileName + extension;
-                var filePath = Path.Combine(folder, realFileName);
-                string tempPath = filePath + ".tmp";
-
-                // Check if there is already an ongoing download on that path
-                if (File.Exists(tempPath))
+                if (dialogResult.ToString().Equals("OK"))
                 {
-                    await this.ShowMessageAsync(
-                        "Error",
-                            "There is already a download in progress at the specified path.");
-                    return;
-                }
+                    string path = folderBrowserDialog.SelectedPath;
+                    if (path.EndsWith("\\") == false)
+                        path += "\\";
 
-                // Check if the file already exists
-                if (File.Exists(filePath))
-                {
-                    var result = await this.ShowMessageAsync(
-                        "Warning", "There is already a file with the same name, do you want to overwrite it? "
-                                   + "If not, please change the file name or download folder.",
-                            MessageDialogStyle.AffirmativeAndNegative);
-
-                    if (result == MessageDialogResult.Affirmative)
+                    Config.Instance.DownloadPath = path;
+                    try
                     {
-                        File.Delete(filePath);
+                        Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
                     }
-                    else
+                    catch
+                    {
+                        await this.ShowMessageAsync(
+                            "Error",
+                                "Could not write to config.xml.");
+                    }
+
+                    string extension = Utility.GetExtensionFromUrl(_downloadlink);
+                    var realFileName = download.FileName + extension;
+                    var filePath = Path.Combine(path, realFileName);
+                    string tempPath = filePath + ".tmp";
+
+                    // Check if there is already an ongoing download on that path
+                    if (File.Exists(tempPath))
+                    {
+                        await this.ShowMessageAsync(
+                            "Error",
+                                "There is already a download in progress at the specified path.");
                         return;
+                    }
+
+                    // Check if the file already exists
+                    if (File.Exists(filePath))
+                    {
+                        var result = await this.ShowMessageAsync(
+                            "Warning", "There is already a file with the same name, do you want to overwrite it? "
+                                       + "If not, please change the file name or download folder.",
+                                MessageDialogStyle.AffirmativeAndNegative);
+
+                        if (result == MessageDialogResult.Affirmative)
+                        {
+                            File.Delete(filePath);
+                        }
+                        else
+                            return;
+                    }
+
+                    // Check the URL
+                    download.CheckUrl();
+                    if (download.HasError)
+                        return;
+
+                    download.TempDownloadPath = tempPath;
+
+                    download.AddedOn = DateTime.UtcNow;
+                    download.CompletedOn = DateTime.MinValue;
+                    download.OpenFileOnCompletion = false;
+
+                    // Add the download to the downloads list
+                    DownloadManager.Instance.DownloadsList.Add(download);
+
+                    // Start downloading the file
+                    download.Start();
+
+                    downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
                 }
-
-                // Check the URL
-                download.CheckUrl();
-                if (download.HasError)
-                    return;
-
-                download.TempDownloadPath = tempPath;
-
-                download.AddedOn = DateTime.UtcNow;
-                download.CompletedOn = DateTime.MinValue;
-                download.OpenFileOnCompletion = false;
-
-                // Add the download to the downloads list
-                DownloadManager.Instance.DownloadsList.Add(download);
-
-                // Start downloading the file
-                download.Start();
-
-                downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
             }
         }
+
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             WebDownloadClient download = (WebDownloadClient)sender;
