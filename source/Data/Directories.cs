@@ -8,5 +8,9 @@ namespace romsdownload.Data
         public static readonly string CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         public static readonly string ConfigFilePath = Path.Combine(CurrentDirectory, "config.xml");
+
+        public static readonly string DownloadsPath = Path.Combine(CurrentDirectory, "Downloads");
+        public static readonly string LogsPath = Path.Combine(CurrentDirectory, "Logs");
+        public static readonly string CachePath = Path.Combine(CurrentDirectory, "Cache");
     }
 }

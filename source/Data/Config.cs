@@ -10,19 +10,8 @@ namespace romsdownload.Data
     {
         [XmlIgnore] public static Config Instance;
 
-        private string _downloadPath;
         private string _selectedStyle;
         private string _selectedColor;
-
-        public string DownloadPath
-        {
-            get { return _downloadPath; }
-            set
-            {
-                _downloadPath = value;
-                OnPropertyChanged("DownloadPath");
-            }
-        }
 
         public string SelectedStyle
         {
