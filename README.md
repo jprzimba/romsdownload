@@ -12,7 +12,7 @@
 ### Credits
 - [Html Agility Pack (HAP)](https://html-agility-pack.net/).
 - [markodt](https://github.com/markodt) (https://github.com/SGet).
-- [Mah Aapps](https://mahapps.com/).
+- [Mah Apps](https://mahapps.com/).
 - [Font Awesome WPF](https://github.com/charri/Font-Awesome-WPF).
 
 ### Donate
