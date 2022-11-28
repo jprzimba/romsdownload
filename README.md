@@ -3,6 +3,9 @@
 
  ROMS Download is a software designed so that users can download game ROMS from a website called [ROMS Pedia](https://www.romspedia.com).
 
+### Purpose
+Learn and improve my skills using the C# programming language.
+
 ### Preview
 ![Game List](images/01.png)
 ![Download List](images/02.png)

@@ -69,6 +69,10 @@ namespace romsdownloader.Classes
                 path = Directories.CachePath;
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
+
+                path = Path.Combine(Directories.CachePath, Directories.ImageCachePath);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
             }
             catch (Exception ex) 
             {

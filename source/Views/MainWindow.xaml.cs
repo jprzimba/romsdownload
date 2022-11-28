@@ -34,6 +34,7 @@ namespace romsdownloader.Views
         public string GameName { get; private set; }
         public string GameUrl { get; private set; }
         public string CoverImage { get; private set; }
+        private int GameCount = 0;
 
         private List<string> propertyNames;
         private List<string> propertyValues;
@@ -296,1107 +297,114 @@ namespace romsdownloader.Views
         #endregion
 
         #region Load Games
+        async Task ScrashGames(string url, string plataform)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            GamePlataform = plataform;
+
+            SCRAP:
+            var Webget = new HtmlWeb();
+            var doc = Webget.Load(url);
+            //Search game
+            foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
+            {
+                GameName = node.SelectSingleNode("a").Attributes["title"].Value;
+                GameName = GameName.Replace(" ROM", "");
+                GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
+
+                CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
+                if (CoverImage.StartsWith("data:image"))
+                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                string extension = Utility.GetExtensionFromUrl(CoverImage);
+                string ImagePath = GameCount + extension;
+                string CachedImageName = Path.Combine(Directories.ImageCachePath, ImagePath);
+
+                if (!File.Exists(CachedImageName))
+                {
+                    WebClient client = new WebClient();
+                    _ = client.DownloadFileTaskAsync(new Uri(CoverImage), CachedImageName);
+                }
+
+                Games = new GameList();
+                Games.Title = GameName;
+                Games.Image = CachedImageName;
+                Games.Url = GameUrl;
+                Games.Plataform = GamePlataform;
+                ContentList.Add(Games);
+                GameCount++;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                statusBarDownloads.Content = "Downloading " + GameName;
+            }
+
+            //Next Page
+            var nextPage = string.Empty;
+            var checkNextPage = string.Empty;
+            foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
+            {
+
+                checkNextPage = node.InnerText;
+                if (checkNextPage.Equals(">"))
+                {
+                    nextPage = node.GetAttributeValue("href", "");
+                    nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
+                    url = nextPage;
+                    goto SCRAP;
+                }
+            }
+        }
+
         async Task DownloadFile()
         {
+            if (!Dispatcher.CheckAccess())
+            {
+                _ = Dispatcher.Invoke(DownloadFile);
+                return;
+            }
+
             try
             {
                 TransformControls(false);
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 statusBarDownloads.Content = "Downloading cache file!";
-                var GameUrlPage = string.Empty;
 
-                //3DS
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_3DS;
-                GamePlataform = "3DS";
-            _3DS:
-                var Webget = new HtmlWeb();
-                var doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                var nextPage = string.Empty;
-                var checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _3DS;
-                    }
-                }
-
-                //AMIGA
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_AMIGA;
-                GamePlataform = "AMIGA";
-            _AMIGA:
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _AMIGA;
-                    }
-                }
-
-                //ATARI 2600
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_2600;
-                GamePlataform = "ATARI 2600";
-            _ATARI_2600:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        await Task.Delay(TimeSpan.FromMilliseconds(1));
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _ATARI_2600;
-                    }
-                }
-
-                //ATARI 5200
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_5200;
-                GamePlataform = "ATARI 5200";
-            _ATARI_5200:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _ATARI_5200;
-                    }
-                }
-
-                //ATARI 7800
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_7800;
-                GamePlataform = "ATARI 7800";
-            _ATARI_7800:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _ATARI_7800;
-                    }
-                }
-
-                //ATARI JAGUAR
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_JAGUAR;
-                GamePlataform = "ATARI JAGUAR";
-            _ATARI_JAGUAR:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _ATARI_JAGUAR;
-                    }
-                }
-
-                //DREAMCAST
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_DREAMCAST;
-                GamePlataform = "DREAMCAST";
-            _DREAMCAST:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _DREAMCAST;
-                    }
-                }
-
-                //FAMICOM
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_FAMICOM;
-                GamePlataform = "FAMICOM";
-            _FAMICOM:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _FAMICOM;
-                    }
-                }
-
-                //GAME CUBE
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMECUBE;
-                GamePlataform = "GAME CUBE";
-            _GAMECUBE:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        await Task.Delay(TimeSpan.FromMilliseconds(1));
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _GAMECUBE;
-                    }
-                }
-
-                //GAME GEAR
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR;
-                GamePlataform = "GAME GEAR";
-            _GAMEGEAR:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _GAMEGEAR;
-                    }
-                }
-
-                //GAME BOY
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GB;
-                GamePlataform = "GAME BOY";
-            _GB:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _GB;
-                    }
-                }
-
-                //GAME BOY ADVANCE
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBA;
-                GamePlataform = "GAME BOY ADVANCE";
-            _GBA:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _GBA;
-                    }
-                }
-
-                //GAME BOY COLOR
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBC;
-                GamePlataform = "GAME BOY COLOR";
-            _GBC:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _GBC;
-                    }
-                }
-
-                //M.A.M.E
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MAME;
-                GamePlataform = "M.A.M.E";
-            _MAME:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _MAME;
-                    }
-                }
-
-                //MASTER SYSTEM
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MASTER_SYSTEM;
-                GamePlataform = "MASTER SYSTEM";
-            _MASTER_SYSTEM:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _MASTER_SYSTEM;
-                    }
-                }
-
-                //MEGA DRIVE
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MEGA_DRIVE;
-                GamePlataform = "MEGA DRIVE";
-            _MEGADRIVE:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _MEGADRIVE;
-                    }
-                }
-
-                //N64
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_N64;
-                GamePlataform = "N64";
-            _N64:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _N64;
-                    }
-                }
-
-                //NDS
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NDS;
-                GamePlataform = "NDS";
-            _NDS:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _NDS;
-                    }
-                }
-
-                //NES
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NES;
-                GamePlataform = "NES";
-            _NES:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _NES;
-                    }
-                }
-
-                //PS2
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PS2;
-                GamePlataform = "PS2";
-            PS2:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto PS2;
-                    }
-                }
-
-                //PSP
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSP;
-                GamePlataform = "PSP";
-            _PSP:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _PSP;
-                    }
-                }
-
-                //PSX
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSX;
-                GamePlataform = "PSX";
-            _PSX:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _PSX;
-                    }
-                }
-
-                //NDS
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_SNES;
-                GamePlataform = "SNES";
-            _SNES:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _SNES;
-                    }
-                }
-
-                //WII
-                GameUrlPage = Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_WII;
-                GamePlataform = "WII";
-            _WII:
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                Webget = new HtmlWeb();
-                doc = Webget.Load(GameUrlPage);
-                //Search game
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"roms-img\"]"))
-                {
-                    GameName = node.SelectSingleNode("a").Attributes["title"].Value;
-                    GameName = GameName.Replace(" ROM", "");
-                    GameUrl = Settings.Default.ROMSPEDIA_BASE_URL + node.SelectSingleNode("a").Attributes["href"].Value;
-
-                    CoverImage = node.SelectSingleNode("a//picture//source").Attributes["srcset"].Value;
-                    if (CoverImage.StartsWith("data:image"))
-                        CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
-
-                    Games = new GameList();
-                    Games.Title = GameName;
-                    Games.Image = CoverImage;
-                    Games.Url = GameUrl;
-                    Games.Plataform = GamePlataform;
-                    ContentList.Add(Games);
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
-                    statusBarDownloads.Content = "Downloading " + GamePlataform;
-                }
-
-                //Next Page
-                nextPage = string.Empty;
-                checkNextPage = string.Empty;
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//li[@class=\"page-item\"]//a[@class=\"page-link\"]"))
-                {
-
-                    checkNextPage = node.InnerText;
-                    if (checkNextPage.Equals(">"))
-                    {
-                        nextPage = node.GetAttributeValue("href", "");
-                        nextPage = Settings.Default.ROMSPEDIA_BASE_URL + nextPage;
-                        GameUrlPage = nextPage;
-                        goto _WII;
-                    }
-                }
-
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_3DS), "3DS");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_AMIGA), "AMIGA");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_2600), "ATARI 2600");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_5200), "ATARI 5200");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_7800), "ATARI 7800");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_JAGUAR), "ATARI JAGUAR");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_DREAMCAST), "DREAMCAST");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_FAMICOM), "FAMICOM");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMECUBE), "GAME CUBE");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR), "GAME GEAR");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GB), "GAME BOY");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBA), "GAME BOY ADVANCE");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBC), "GAME BOY COLOR");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MAME), "M.A.M.E");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MASTER_SYSTEM), "MASTER SYSTEM");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MEGA_DRIVE), "MEGA DRIVE");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_N64), "N64");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NDS), "NDS");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NES), "NES");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PS2), "PS2");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSP), "PSP");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSX), "PSX");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_SNES), "SNES");
+                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_WII), "WII");
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1));
                 var folder = Directories.CachePath;
                 var file = Path.Combine(folder, "GameList.json");
                 JsonFormat.Export(file, ContentList);
-
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
                 TransformControls(true);
                 statusBarDownloads.Content = "Downlaod Complete!";
             }
             catch
             {
-                ContentList.Clear();
+
             }
         }
 
@@ -1420,8 +428,6 @@ namespace romsdownloader.Views
                         "Unable to load json file.");
                 return;
             }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(1));
 
             uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
             statusBarDownloads.Content = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();

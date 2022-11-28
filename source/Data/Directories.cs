@@ -12,5 +12,6 @@ namespace romsdownload.Data
         public static readonly string DownloadsPath = Path.Combine(CurrentDirectory, "Downloads");
         public static readonly string LogsPath = Path.Combine(CurrentDirectory, "Logs");
         public static readonly string CachePath = Path.Combine(CurrentDirectory, "Cache");
+        public static readonly string ImageCachePath = Path.Combine(CachePath, "Images");
     }
 }

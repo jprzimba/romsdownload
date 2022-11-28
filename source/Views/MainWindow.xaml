@@ -1,4 +1,5 @@
-﻿<Controls:MetroWindow x:Class="romsdownloader.Views.MainWindow"
+﻿<Controls:MetroWindow
+    x:Class="romsdownloader.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
@@ -103,8 +104,8 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
-                                <Image Margin="4" Source="{Binding Image}" Width="245" Height="140"/>
-                                <Label Margin="4" Content="{Binding Title}" Width="245" Height="30" HorizontalContentAlignment="Center"/>
+                                <Image Margin="4" Source="{Binding Image}" Width="250" Height="140"/>
+                                <Label Margin="4" Content="{Binding Title}" Width="250" Height="30" HorizontalContentAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
