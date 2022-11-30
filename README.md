@@ -11,9 +11,10 @@ Learn and improve my skills using the C# programming language.
 
 ### Credits
 - [Html Agility Pack (HAP)](https://html-agility-pack.net/).
-- [markodt](https://github.com/markodt) (https://github.com/SGet).
+- [markodt](https://github.com/SGet)
 - [Mah Apps](https://mahapps.com/).
 - [Font Awesome WPF](https://github.com/charri/Font-Awesome-WPF).
+- [niklyadov](https://github.com/niklyadov/tiny-ini-file-class)
 
 ### Donate
 You can make a donation via PIX to the following email: jprzimba@gmail.com (Brazil Only)
