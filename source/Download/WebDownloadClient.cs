@@ -10,6 +10,7 @@ using System.Windows;
 using System;
 using MahApps.Metro.Controls.Dialogs;
 using romsdownloader.Views;
+using romsdownload.Data;
 
 namespace romsdownload.Download
 {
@@ -309,8 +310,15 @@ namespace romsdownload.Download
 
         public WebDownloadClient(string url)
         {
+            int memoryCacheSize;
+            IniFile config = new IniFile(Directories.ConfigFilePath);
+            if (config.KeyExists("MemoryCacheSize", "Downloads"))
+                memoryCacheSize = Convert.ToInt32(config.Read("MemoryCacheSize", "Downloads"));
+            else
+                memoryCacheSize = 1024;
+
             this.BufferSize = 1024; // Buffer size is 1KB
-            this.MaxCacheSize = Settings.Default.MemoryCacheSize * 1024; // Default cache size is 1MB
+            this.MaxCacheSize = memoryCacheSize * 1024; // Default cache size is 1MB
             this.BufferCountPerNotification = 64;
 
             this.Url = new Uri(url, UriKind.Absolute);
@@ -653,7 +661,14 @@ namespace romsdownload.Download
                 this.Status = DownloadStatus.Waiting;
                 RaisePropertyChanged("StatusString");
 
-                if (DownloadManager.Instance.ActiveDownloads > Settings.Default.MaxDownloads)
+                int maxDownloads;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("MaxDownloads", "Downloads"))
+                    maxDownloads = Convert.ToInt32(config.Read("MaxDownloads", "Downloads"));
+                else
+                    maxDownloads = 5;
+
+                if (DownloadManager.Instance.ActiveDownloads > maxDownloads)
                 {
                     this.Status = DownloadStatus.Queued;
                     RaisePropertyChanged("StatusString");
@@ -699,7 +714,14 @@ namespace romsdownload.Download
                 this.Status = DownloadStatus.Waiting;
                 UpdateDownloadDisplay();
 
-                if (DownloadManager.Instance.ActiveDownloads > Settings.Default.MaxDownloads)
+                int maxDownloads;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("MaxDownloads", "Downloads"))
+                    maxDownloads = Convert.ToInt32(config.Read("MaxDownloads", "Downloads"));
+                else
+                    maxDownloads = 5;
+
+                if (DownloadManager.Instance.ActiveDownloads > maxDownloads)
                 {
                     this.Status = DownloadStatus.Queued;
                     RaisePropertyChanged("StatusString");
@@ -785,9 +807,18 @@ namespace romsdownload.Download
 
                 // Set speed limit
                 long maxBytesPerSecond = 0;
-                if (Settings.Default.EnableSpeedLimit)
+                bool enableSpeedLimit = false;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("EnableSpeedLimit", "Downloads"))
+                    enableSpeedLimit = Convert.ToBoolean(config.Read("EnableSpeedLimit", "Downloads"));
+
+                if (enableSpeedLimit)
                 {
-                    maxBytesPerSecond = (long)((Settings.Default.SpeedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
+                    int speedLimit = 200;
+                    if (config.KeyExists("SpeedLimit", "Downloads"))
+                        speedLimit = Convert.ToInt32(config.Read("SpeedLimit", "Downloads"));
+
+                    maxBytesPerSecond = (long)((speedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
                 }
                 else
                 {
@@ -810,9 +841,18 @@ namespace romsdownload.Download
                 {
                     if (SpeedLimitChanged)
                     {
-                        if (Settings.Default.EnableSpeedLimit)
+                        if (config.KeyExists("EnableSpeedLimit", "Downloads"))
+                            enableSpeedLimit = Convert.ToBoolean(config.Read("EnableSpeedLimit", "Downloads"));
+                        else
+                            enableSpeedLimit = false;
+
+                        if (enableSpeedLimit)
                         {
-                            maxBytesPerSecond = (long)((Settings.Default.SpeedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
+                            int speedLimit = 200;
+                            if (config.KeyExists("SpeedLimit", "Downloads"))
+                                speedLimit = Convert.ToInt32(config.Read("SpeedLimit", "Downloads"));
+
+                            maxBytesPerSecond = (long)((speedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
                         }
                         else
                         {

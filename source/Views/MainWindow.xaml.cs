@@ -215,7 +215,12 @@ namespace romsdownloader.Views
                             downloadClient.IsBatch = Boolean.Parse(download.Element("is_batch").Value);
                             downloadClient.BatchUrlChecked = Boolean.Parse(download.Element("url_checked").Value);
 
-                            if (downloadClient.Status == DownloadStatus.Paused && !downloadClient.HasError && Settings.Default.StartDownloadsOnStartup)
+                            bool startDownloadsOnStartup = true;
+                            IniFile config = new IniFile(Directories.ConfigFilePath);
+                            if (config.KeyExists("StartDownloadsOnStartup", "Downloads"))
+                                startDownloadsOnStartup = Convert.ToBoolean(config.Read("StartDownloadsOnStartup", "Downloads"));
+
+                            if (downloadClient.Status == DownloadStatus.Paused && !downloadClient.HasError && startDownloadsOnStartup)
                             {
                                 downloadClient.Start();
                             }
@@ -528,7 +533,16 @@ namespace romsdownloader.Views
                 DownloadManager.Instance.DownloadsList.Add(download);
 
                 // Start downloading the file
-                download.Start();
+                bool startImmediately = true;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("StartImmediately", "Downloads"))
+                    startImmediately = Convert.ToBoolean(config.Read("StartImmediately", "Downloads"));
+
+                // Start downloading the file
+                if (startImmediately)
+                    download.Start();
+                else
+                    download.Status = DownloadStatus.Paused;
 
                 downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
             }

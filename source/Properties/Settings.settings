@@ -77,20 +77,5 @@
     <Setting Name="ROMSPEDIA_PATH_MEGA_DRIVE" Type="System.String" Scope="User">
       <Value Profile="(Default)">/roms/sega-genesis</Value>
     </Setting>
-    <Setting Name="MemoryCacheSize" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1024</Value>
-    </Setting>
-    <Setting Name="MaxDownloads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
-    </Setting>
-    <Setting Name="EnableSpeedLimit" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="SpeedLimit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">200</Value>
-    </Setting>
-    <Setting Name="StartDownloadsOnStartup" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
   </Settings>
 </SettingsFile>
