@@ -7,10 +7,7 @@
 Learn and improve my skills using the C# programming language.
 
 ### Preview
-![Game List](images/01.png)
-![Download List](images/02.png)
-![Download Menu](images/03.png)
-![Cancel Download Confirmation](images/04.png)
+- [Click here!](https://github.com/tryller/romsdownload/tree/main/images).
 
 ### Credits
 - [Html Agility Pack (HAP)](https://html-agility-pack.net/).
@@ -19,9 +16,7 @@ Learn and improve my skills using the C# programming language.
 - [Font Awesome WPF](https://github.com/charri/Font-Awesome-WPF).
 
 ### Donate
-
-If you live in Brazil and liked the project's initiative, you can make a donation via PIX to the following email: jprzimba@gmail.com
-You can also donate via [PayPal](https://www.paypal.com/donate/?business=XKPHGJJSTE2RQ&no_recurring=0&currency_code=BRL)
+You can make a donation via PIX to the following email: jprzimba@gmail.com (Brazil Only)
 
 ### Issues
 

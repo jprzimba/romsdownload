@@ -250,7 +250,7 @@ namespace romsdownloader.Views
             _ = Task.Delay(TimeSpan.FromMilliseconds(1));
 
             uxTabGameList.Visibility = Visibility.Hidden;
-            uxTabCurrentDownlaods.Visibility = Visibility.Hidden;
+            uxTabCurrentDownloads.Visibility = Visibility.Hidden;
 
             var folder = Directories.CachePath;
             var file = Path.Combine(folder, "GameList.json");
@@ -400,7 +400,7 @@ namespace romsdownloader.Views
                 var file = Path.Combine(folder, "GameList.json");
                 JsonFormat.Export(file, ContentList);
                 TransformControls(true);
-                statusBarDownloads.Content = "Downlaod Complete!";
+                statusBarDownloads.Content = "Download Complete!";
             }
             catch
             {
@@ -702,7 +702,7 @@ namespace romsdownloader.Views
 
         private void uxBtnDonate_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://www.paypal.com/donate/?business=XKPHGJJSTE2RQ&no_recurring=0&currency_code=BRL");
+            Process.Start("https://github.com/tryller/romsdownload#donate");
         }
 
         private void uxBtnGitHubProject_Click(object sender, RoutedEventArgs e)

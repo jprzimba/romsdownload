@@ -113,7 +113,7 @@
             </TabItem>
 
             <!-- Downloads -->
-            <TabItem Header="Downloads" x:Name="uxTabCurrentDownlaods">
+            <TabItem Header="Downloads" x:Name="uxTabCurrentDownloads">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="dgScrollViewer">
                     <DataGrid AutoGenerateColumns="False" x:Name="downloadsGrid" VerticalContentAlignment="Center"
                             BorderThickness="0" IsReadOnly="True" GridLinesVisibility="None" MinRowHeight="22" 
