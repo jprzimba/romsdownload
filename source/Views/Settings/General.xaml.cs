@@ -39,8 +39,9 @@ namespace romsdownload.Views.Settings
             foreach (var theme in _style)
                 uxComboStyle.Items.Add(theme);
 
-            if (Config.Instance.SelectedStyle != null)
-                uxComboStyle.SelectedItem = Config.Instance.SelectedStyle;
+            IniFile config = new IniFile(Directories.ConfigFilePath);
+            if (config.KeyExists("SelectedStyle", "Theme"))
+               uxComboStyle.SelectedItem = config.Read("SelectedStyle", "Theme");
 
             if (uxComboStyle.SelectedIndex == -1)
                 uxComboStyle.SelectedIndex = uxComboStyle.Items.IndexOf("Light");
@@ -52,8 +53,9 @@ namespace romsdownload.Views.Settings
             foreach (var color in _accentColors)
                 uxComboColor.Items.Add(color);
 
-            if (Config.Instance.SelectedColor != null)
-                uxComboColor.SelectedItem = Config.Instance.SelectedColor;
+            IniFile config = new IniFile(Directories.ConfigFilePath);
+            if (config.KeyExists("SelectedColor", "Theme"))
+                uxComboColor.SelectedItem = config.Read("SelectedColor", "Theme");
 
             if (uxComboColor.SelectedIndex == -1)
                 uxComboColor.SelectedIndex = uxComboColor.Items.IndexOf("Blue");
@@ -65,7 +67,8 @@ namespace romsdownload.Views.Settings
             if (_accentColors.Contains(color))
             {
                 ThemeManager.Current.ChangeThemeColorScheme(Application.Current, color);
-                Config.Instance.SelectedColor = color;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                config.Write("SelectedColor", color,  "Theme");
             }
         }
 
@@ -75,19 +78,8 @@ namespace romsdownload.Views.Settings
             if (_style.Contains(style))
             {
                 ThemeManager.Current.ChangeThemeBaseColor(Application.Current, style);
-                Config.Instance.SelectedStyle = style;
-            }
-        }
-
-        private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            try
-            {
-                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-            }
-            catch
-            {
-                await this.ShowMessageAsync("Error", "Could not write to config.xml.");
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                config.Write("SelectedStyle", style, "Theme");
             }
         }
     }

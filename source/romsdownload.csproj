@@ -87,6 +87,7 @@
     <Compile Include="Classes\JsonFormat.cs" />
     <Compile Include="Classes\Utility.cs" />
     <Compile Include="Data\Directories.cs" />
+    <Compile Include="Data\IniFile.cs" />
     <Compile Include="Views\Settings\General.xaml.cs">
       <DependentUpon>General.xaml</DependentUpon>
     </Compile>
@@ -98,7 +99,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Config.cs" />
     <Compile Include="Download\DownloadManager.cs" />
     <Compile Include="Download\DownloadStatus.cs" />
     <Compile Include="Download\ThrottledStream.cs" />

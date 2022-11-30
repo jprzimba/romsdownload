@@ -8,8 +8,7 @@
     mc:Ignorable="d"
     Title="Settings" Height="191" Width="262"
     ShowMinButton="False" ShowMaxRestoreButton="False"
-    WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-    Closing="MetroWindow_Closing">
+    WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
 
     <Grid>
         <Grid.ColumnDefinitions>

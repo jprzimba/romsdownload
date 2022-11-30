@@ -279,19 +279,7 @@ namespace romsdownloader.Views
             _shutdown = result == MessageDialogResult.Affirmative;
 
             if (_shutdown)
-            {
-                try
-                {
-                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-                }
-                catch
-                {
-                    await this.ShowMessageAsync(
-                        "Error",
-                            "Could not write to config.xml.");
-                }
                 Application.Current.Shutdown();
-            }
 
         }
         #endregion

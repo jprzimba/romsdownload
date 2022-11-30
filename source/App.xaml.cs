@@ -20,70 +20,24 @@ namespace romsdownloader
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            if (!File.Exists(Directories.ConfigFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter(Directories.ConfigFilePath))
-                {
-                    writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-                    writer.WriteLine("<Config xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">");
-                    writer.WriteLine("</Config>");
-                    writer.Close();
-                }
-            }
-
-            var configCorrupted = false;
             try
             {
-                Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath));
+                if (!File.Exists(Directories.ConfigFilePath))
+                    File.Create(Directories.ConfigFilePath);
             }
-            catch (Exception)
+            catch
             {
-                configCorrupted = true;
+                MessageBox.Show("Can't create config file!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Application.Current.Shutdown();
             }
 
-            if (!configCorrupted)
-            {
-                try
-                {
-                    if (File.Exists(Directories.ConfigFilePath + ".bak"))
-                    {
-                        File.Delete(Directories.ConfigFilePath + ".bak");
-                    }
-                    File.Copy(Directories.ConfigFilePath, Directories.ConfigFilePath + ".bak");
-                    File.SetAttributes(Directories.ConfigFilePath + ".bak", FileAttributes.Hidden);
-                }
-                catch (Exception)
-                {
-                    //ignore
-                }
-            }
-            else
-            {
-                try
-                {
-                    Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak"));
-                    File.Delete(Directories.ConfigFilePath);
-                    File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
-                    File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);
-                }
-                catch (Exception)
-                {
-                    File.Delete(Directories.ConfigFilePath + ".bak");
-                    File.Delete(Directories.ConfigFilePath);
-                    MessageBox.Show("Couldn't load config.xml.");
-                    Application.Current.Shutdown();
-                }
-            }
+            IniFile config = new IniFile(Directories.ConfigFilePath);
+            if (config.KeyExists("SelectedStyle", "Theme"))
+                ThemeManager.Current.ChangeThemeBaseColor(Application.Current, config.Read("SelectedStyle", "Theme"));
 
-            if (Config.Instance.SelectedStyle != null)
-            {
-                ThemeManager.Current.ChangeThemeBaseColor(Application.Current, Config.Instance.SelectedStyle);
-            }
+            if (config.KeyExists("SelectedColor", "Theme"))
+                ThemeManager.Current.ChangeThemeColorScheme(Application.Current, config.Read("SelectedColor", "Theme"));
 
-            if (Config.Instance.SelectedColor != null)
-            {
-                ThemeManager.Current.ChangeThemeColorScheme(Application.Current, Config.Instance.SelectedColor);
-            }
 
             base.OnStartup(e);
         }
