@@ -1,6 +1,8 @@
 ﻿using ControlzEx.Theming;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using romsdownload.Data;
+using romsdownloader.Classes;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -35,44 +37,31 @@ namespace romsdownload.Views.Settings
         private void Style_Loaded(object sender, RoutedEventArgs e)
         {
             foreach (var theme in _style)
-            {
                 uxComboStyle.Items.Add(theme);
-            }
 
             if (Config.Instance.SelectedStyle != null)
-            {
                 uxComboStyle.SelectedItem = Config.Instance.SelectedStyle;
-            }
 
             if (uxComboStyle.SelectedIndex == -1)
-            {
                 uxComboStyle.SelectedIndex = uxComboStyle.Items.IndexOf("Light");
-            }
         }
 
 
         private void Color_Loaded(object sender, RoutedEventArgs e)
         {
             foreach (var color in _accentColors)
-            {
                 uxComboColor.Items.Add(color);
-            }
 
             if (Config.Instance.SelectedColor != null)
-            {
                 uxComboColor.SelectedItem = Config.Instance.SelectedColor;
-            }
 
             if (uxComboColor.SelectedIndex == -1)
-            {
                 uxComboColor.SelectedIndex = uxComboColor.Items.IndexOf("Blue");
-            }
         }
 
         private void Color_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var color = uxComboColor.SelectedValue.ToString();
-
             if (_accentColors.Contains(color))
             {
                 ThemeManager.Current.ChangeThemeColorScheme(Application.Current, color);
@@ -82,13 +71,23 @@ namespace romsdownload.Views.Settings
 
         private void Style_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             var style = uxComboStyle.SelectedValue.ToString();
-
             if (_style.Contains(style))
             {
                 ThemeManager.Current.ChangeThemeBaseColor(Application.Current, style);
                 Config.Instance.SelectedStyle = style;
+            }
+        }
+
+        private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+            }
+            catch
+            {
+                await this.ShowMessageAsync("Error", "Could not write to config.xml.");
             }
         }
     }

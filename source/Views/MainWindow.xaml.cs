@@ -75,7 +75,7 @@ namespace romsdownloader.Views
             {
                 //EnableMenuItems(false);
 
-                var folder = "Games";
+                var folder = Directories.DownloadsPath;
                 var dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
                 // Clean temporary files in the download directory if no downloads were loaded
                 if (Directory.Exists(dir))
