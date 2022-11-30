@@ -310,12 +310,10 @@ namespace romsdownload.Download
 
         public WebDownloadClient(string url)
         {
-            int memoryCacheSize;
+            int memoryCacheSize = 1024;
             IniFile config = new IniFile(Directories.ConfigFilePath);
             if (config.KeyExists("MemoryCacheSize", "Downloads"))
                 memoryCacheSize = Convert.ToInt32(config.Read("MemoryCacheSize", "Downloads"));
-            else
-                memoryCacheSize = 1024;
 
             this.BufferSize = 1024; // Buffer size is 1KB
             this.MaxCacheSize = memoryCacheSize * 1024; // Default cache size is 1MB
@@ -661,12 +659,10 @@ namespace romsdownload.Download
                 this.Status = DownloadStatus.Waiting;
                 RaisePropertyChanged("StatusString");
 
-                int maxDownloads;
+                int maxDownloads = 5;
                 IniFile config = new IniFile(Directories.ConfigFilePath);
                 if (config.KeyExists("MaxDownloads", "Downloads"))
                     maxDownloads = Convert.ToInt32(config.Read("MaxDownloads", "Downloads"));
-                else
-                    maxDownloads = 5;
 
                 if (DownloadManager.Instance.ActiveDownloads > maxDownloads)
                 {
