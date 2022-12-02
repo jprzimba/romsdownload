@@ -1,0 +1,22 @@
+﻿<Controls:MetroWindow
+    x:Class="romsdownload.Views.StartupWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    mc:Ignorable="d"
+    Title="ROMS Download" Height="115" Width="290"
+    WindowStyle="SingleBorderWindow" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="10">
+        <StackPanel>
+            <Label Content="Select download folder..."/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="uxDownloadPathTextBox" Width="150" Margin="5"/>
+                <Button x:Name="uxBtnSelectFolder" Content="Browse" Margin="5" Click="uxBtnSelectFolder_Click"/>
+                <Button x:Name="uxBtnSavePath" Content="Save" Margin="5" Click="uxBtnSavePath_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Controls:MetroWindow>

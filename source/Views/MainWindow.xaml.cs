@@ -77,6 +77,13 @@ namespace romsdownloader.Views
 
                 var folder = Directories.DownloadsPath;
                 var dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("DownloadPath", "Downloads"))
+                {
+                    folder = config.Read("DownloadPath", "Downloads");
+                    dir = folder;
+                }
+
                 // Clean temporary files in the download directory if no downloads were loaded
                 if (Directory.Exists(dir))
                 {
@@ -284,7 +291,10 @@ namespace romsdownloader.Views
             _shutdown = result == MessageDialogResult.Affirmative;
 
             if (_shutdown)
+            {
+                SaveDownloadsToXml();
                 Application.Current.Shutdown();
+            }
 
         }
         #endregion
@@ -487,6 +497,10 @@ namespace romsdownloader.Views
 
                 // Create path to temporary file
                 var folder = Directories.DownloadsPath;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("DownloadPath", "Downloads"))
+                    folder = config.Read("DownloadPath", "Downloads");
+
                 string extension = Utility.GetExtensionFromUrl(_downloadlink);
 
                 var realFileName = download.FileName + extension;
@@ -534,7 +548,6 @@ namespace romsdownloader.Views
 
                 // Start downloading the file
                 bool startImmediately = true;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
                 if (config.KeyExists("StartImmediately", "Downloads"))
                     startImmediately = Convert.ToBoolean(config.Read("StartImmediately", "Downloads"));
 

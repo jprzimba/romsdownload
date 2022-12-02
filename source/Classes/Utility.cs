@@ -7,14 +7,13 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Serialization;
 
 namespace romsdownloader.Classes
 {
     internal class Utility
     {
-        private NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
-
         public static void CreateFileFromResource(string path, string resource, bool overwrite = false)
         {
             if (!overwrite && File.Exists(path))
@@ -59,6 +58,10 @@ namespace romsdownloader.Classes
             try
             {
                 var path = Directories.DownloadsPath;
+                IniFile config = new IniFile(Directories.ConfigFilePath);
+                if (config.KeyExists("DownloadPath", "Downloads"))
+                    path = config.Read("DownloadPath", "Downloads");
+
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
