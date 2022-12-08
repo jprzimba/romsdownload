@@ -6,11 +6,11 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading;
-using System.Windows;
 using System;
 using MahApps.Metro.Controls.Dialogs;
 using romsdownloader.Views;
 using romsdownload.Data;
+using System.Data.SQLite;
 
 namespace romsdownload.Download
 {
@@ -311,9 +311,15 @@ namespace romsdownload.Download
         public WebDownloadClient(string url)
         {
             int memoryCacheSize = 1024;
-            IniFile config = new IniFile(Directories.ConfigFilePath);
-            if (config.KeyExists("MemoryCacheSize", "Downloads"))
-                memoryCacheSize = Convert.ToInt32(config.Read("MemoryCacheSize", "Downloads"));
+            var cmd = Database.Connection().CreateCommand();
+            var sql = "SELECT * FROM Downloads";
+            cmd.CommandText = sql;
+            SQLiteDataReader readerConfig = cmd.ExecuteReader();
+            while (readerConfig.Read())
+            {
+                //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                memoryCacheSize = readerConfig.GetInt32(1);
+            }
 
             this.BufferSize = 1024; // Buffer size is 1KB
             this.MaxCacheSize = memoryCacheSize * 1024; // Default cache size is 1MB
@@ -660,9 +666,15 @@ namespace romsdownload.Download
                 RaisePropertyChanged("StatusString");
 
                 int maxDownloads = 5;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("MaxDownloads", "Downloads"))
-                    maxDownloads = Convert.ToInt32(config.Read("MaxDownloads", "Downloads"));
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
+                {
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                    maxDownloads = readerConfig.GetInt32(2);
+                }
 
                 if (DownloadManager.Instance.ActiveDownloads > maxDownloads)
                 {
@@ -710,12 +722,16 @@ namespace romsdownload.Download
                 this.Status = DownloadStatus.Waiting;
                 UpdateDownloadDisplay();
 
-                int maxDownloads;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("MaxDownloads", "Downloads"))
-                    maxDownloads = Convert.ToInt32(config.Read("MaxDownloads", "Downloads"));
-                else
-                    maxDownloads = 5;
+                int maxDownloads = 5;
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
+                {
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                    maxDownloads = readerConfig.GetInt32(2);
+                }
 
                 if (DownloadManager.Instance.ActiveDownloads > maxDownloads)
                 {
@@ -804,15 +820,29 @@ namespace romsdownload.Download
                 // Set speed limit
                 long maxBytesPerSecond = 0;
                 bool enableSpeedLimit = false;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("EnableSpeedLimit", "Downloads"))
-                    enableSpeedLimit = Convert.ToBoolean(config.Read("EnableSpeedLimit", "Downloads"));
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
+                {
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                    if (readerConfig.GetInt32(3) > 0)
+                        enableSpeedLimit = true;
+                }
 
                 if (enableSpeedLimit)
                 {
                     int speedLimit = 200;
-                    if (config.KeyExists("SpeedLimit", "Downloads"))
-                        speedLimit = Convert.ToInt32(config.Read("SpeedLimit", "Downloads"));
+                    cmd = Database.Connection().CreateCommand();
+                    sql = "SELECT * FROM Downloads";
+                    cmd.CommandText = sql;
+                    readerConfig = cmd.ExecuteReader();
+                    while (readerConfig.Read())
+                    {
+                        //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                        speedLimit = readerConfig.GetInt32(4);
+                    }
 
                     maxBytesPerSecond = (long)((speedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
                 }
@@ -837,16 +867,29 @@ namespace romsdownload.Download
                 {
                     if (SpeedLimitChanged)
                     {
-                        if (config.KeyExists("EnableSpeedLimit", "Downloads"))
-                            enableSpeedLimit = Convert.ToBoolean(config.Read("EnableSpeedLimit", "Downloads"));
-                        else
-                            enableSpeedLimit = false;
+                        cmd = Database.Connection().CreateCommand();
+                        sql = "SELECT * FROM Downloads";
+                        cmd.CommandText = sql;
+                        readerConfig = cmd.ExecuteReader();
+                        while (readerConfig.Read())
+                        {
+                            //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                            if (readerConfig.GetInt32(3) > 0) 
+                                enableSpeedLimit = true;
+                        }
 
                         if (enableSpeedLimit)
                         {
                             int speedLimit = 200;
-                            if (config.KeyExists("SpeedLimit", "Downloads"))
-                                speedLimit = Convert.ToInt32(config.Read("SpeedLimit", "Downloads"));
+                            cmd = Database.Connection().CreateCommand();
+                            sql = "SELECT * FROM Downloads";
+                            cmd.CommandText = sql;
+                            readerConfig = cmd.ExecuteReader();
+                            while (readerConfig.Read())
+                            {
+                                //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                                speedLimit = readerConfig.GetInt32(4);
+                            }
 
                             maxBytesPerSecond = (long)((speedLimit * 1024) / DownloadManager.Instance.ActiveDownloads);
                         }

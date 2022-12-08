@@ -89,7 +89,7 @@
         </ComboBox>
 
         <fa:ImageAwesome Icon="Search" Foreground="DimGray" Width="25" Margin="10" Grid.Row="0" Grid.Column="2"/>
-        <TextBox Margin="0,10,10,10" x:Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" TextChanged="uxTextBoxSearch_TextChanged" Grid.Row="0" Grid.Column="3"/>
+        <TextBox Margin="0,10,10,10" x:Name="uxTextBoxSearch" BorderBrush="DimGray" BorderThickness="1" Grid.Row="0" Grid.Column="3" KeyDown="uxTextBoxSearch_KeyDown"/>
 
         <TabControl x:Name="uxMainTabControl" Grid.Row="1" Grid.ColumnSpan="4" Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
             <!-- Game List -->
@@ -104,8 +104,8 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
-                                <Image Margin="4" Source="{Binding Image}" Width="250" Height="140"/>
-                                <Label Margin="4" Content="{Binding Title}" Width="250" Height="30" HorizontalContentAlignment="Center"/>
+                                <Image Margin="4" Source="{Binding image}" Width="250" Height="140"/>
+                                <Label Margin="4" Content="{Binding title}" Width="250" Height="30" HorizontalContentAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

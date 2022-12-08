@@ -49,27 +49,7 @@ namespace romsdownload.Views
             if (string.IsNullOrEmpty(uxDownloadPathTextBox.Text))
                 return;
 
-            try
-            {
-                if (!File.Exists(Directories.ConfigFilePath))
-                    File.Create(Directories.ConfigFilePath);
-            }
-            catch
-            {
-                MessageBox.Show("Can't create config file!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Application.Current.Shutdown();
-            }
-
-
-            IniFile config = new IniFile(Directories.ConfigFilePath);
-            config.Write("MemoryCacheSize", "1024", "Downloads");
-            config.Write("MaxDownloads", "5", "Downloads");
-            config.Write("EnableSpeedLimit", "false", "Downloads");
-            config.Write("SpeedLimit", "200", "Downloads");
-            config.Write("StartDownloadsOnStartup", "true", "Downloads");
-            config.Write("StartImmediately", "true", "Downloads");
-
-            config.Write("DownloadPath", DownlaodPath, "Downloads");
+            Database.SaveDownloadPath(DownlaodPath);
 
             this.Hide();
             MainWindow mw = new MainWindow();

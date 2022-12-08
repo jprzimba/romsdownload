@@ -6,7 +6,6 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
-using romsdownload.Classes;
 using System.Collections.Generic;
 using HtmlAgilityPack;
 using romsdownload.Properties;
@@ -21,6 +20,9 @@ using System.Net;
 using MahApps.Metro.Controls.Dialogs;
 using romsdownload.Views.Settings;
 using romsdownload.Data;
+using System.Data;
+using romsdownload.Views;
+using System.Data.SQLite;
 
 namespace romsdownloader.Views
 {
@@ -28,19 +30,18 @@ namespace romsdownloader.Views
     {
         #region Declarations 
         public static MainWindow Instance;
-        public List<GameList> ContentList { get; private set; }
-        public GameList Games { get; private set; }
+
         public string GamePlataform { get; private set; }
         public string GameName { get; private set; }
         public string GameUrl { get; private set; }
         public string CoverImage { get; private set; }
-        private int GameCount = 0;
 
         private List<string> propertyNames;
         private List<string> propertyValues;
         private List<PropertyModel> propertiesList;
 
         private bool _shutdown;
+
         #endregion
 
         #region Constructor
@@ -77,11 +78,19 @@ namespace romsdownloader.Views
 
                 var folder = Directories.DownloadsPath;
                 var dir = Path.Combine(Directory.GetCurrentDirectory(), folder);
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("DownloadPath", "Downloads"))
+
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
                 {
-                    folder = config.Read("DownloadPath", "Downloads");
-                    dir = folder;
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                    if (readerConfig.GetString(7) != String.Empty)
+                    {
+                        folder = readerConfig.GetString(7);
+                        dir = folder;
+                    }
                 }
 
                 // Clean temporary files in the download directory if no downloads were loaded
@@ -96,7 +105,8 @@ namespace romsdownloader.Views
                 }
             }
 
-            Loaded += WindowLoaded;
+            uxTabGameList.Visibility = Visibility.Hidden;
+            uxTabCurrentDownloads.Visibility = Visibility.Hidden;
         }
 
         #endregion
@@ -161,7 +171,7 @@ namespace romsdownloader.Views
             }
         }
 
-        private async void LoadDownloadsFromXml()
+        private void LoadDownloadsFromXml()
         {
             try
             {
@@ -223,9 +233,17 @@ namespace romsdownloader.Views
                             downloadClient.BatchUrlChecked = Boolean.Parse(download.Element("url_checked").Value);
 
                             bool startDownloadsOnStartup = true;
-                            IniFile config = new IniFile(Directories.ConfigFilePath);
-                            if (config.KeyExists("StartDownloadsOnStartup", "Downloads"))
-                                startDownloadsOnStartup = Convert.ToBoolean(config.Read("StartDownloadsOnStartup", "Downloads"));
+                            var cmd = Database.Connection().CreateCommand();
+                            var sql = "SELECT * FROM Downloads";
+                            cmd.CommandText = sql;
+                            SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                            while (readerConfig.Read())
+                            {
+                                //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                                
+                                if (readerConfig.GetInt32(5) > 0)
+                                    startDownloadsOnStartup = true;
+                            }
 
                             if (downloadClient.Status == DownloadStatus.Paused && !downloadClient.HasError && startDownloadsOnStartup)
                             {
@@ -243,9 +261,7 @@ namespace romsdownloader.Views
             }
             catch (Exception)
             {
-                await this.ShowMessageAsync(
-                    "Error",
-                        "There was an error while loading the download list.");
+                Instance.ShowMessageAsync("Error", "There was an error while loading the download list.");
             }
         }
         #endregion
@@ -254,20 +270,6 @@ namespace romsdownloader.Views
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             SaveDownloadsToXml();
-        }
-
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        {
-            ContentList = new List<GameList>();
-            _ = Task.Delay(TimeSpan.FromMilliseconds(1));
-
-            uxTabGameList.Visibility = Visibility.Hidden;
-            uxTabCurrentDownloads.Visibility = Visibility.Hidden;
-
-            var folder = Directories.CachePath;
-            var file = Path.Combine(folder, "GameList.json");
-            if (!File.Exists(file))
-                _ = DownloadFile();
         }
 
         private async void Window_Closing(object sender, CancelEventArgs e)
@@ -300,12 +302,12 @@ namespace romsdownloader.Views
         #endregion
 
         #region Load Games
-        async Task ScrashGames(string url, string plataform)
+        private async Task ScrapGames(string url, string plataform)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            TransformControls(false);
             GamePlataform = plataform;
 
-            SCRAP:
+        SCRAP:
             var Webget = new HtmlWeb();
             var doc = Webget.Load(url);
             //Search game
@@ -319,26 +321,17 @@ namespace romsdownloader.Views
                 if (CoverImage.StartsWith("data:image"))
                     CoverImage = node.SelectSingleNode("a//picture//source").Attributes["data-srcset"].Value;
 
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
                 string extension = Utility.GetExtensionFromUrl(CoverImage);
-                string ImagePath = GameCount + extension;
+                string ImagePath = Utility.GenerateRandomString(9) + "_" + GamePlataform +  extension;
                 string CachedImageName = Path.Combine(Directories.ImageCachePath, ImagePath);
 
                 if (!File.Exists(CachedImageName))
                 {
                     WebClient client = new WebClient();
-                    _ = client.DownloadFileTaskAsync(new Uri(CoverImage), CachedImageName);
+                    await client.DownloadFileTaskAsync(new Uri(CoverImage), CachedImageName);
                 }
 
-                Games = new GameList();
-                Games.Title = GameName;
-                Games.Image = CachedImageName;
-                Games.Url = GameUrl;
-                Games.Plataform = GamePlataform;
-                ContentList.Add(Games);
-                GameCount++;
-
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                Database.Add(GameName, CachedImageName, GameUrl, GamePlataform);
                 statusBarDownloads.Content = "Downloading " + GameName;
             }
 
@@ -357,84 +350,23 @@ namespace romsdownloader.Views
                     goto SCRAP;
                 }
             }
-        }
 
-        async Task DownloadFile()
-        {
-            if (!Dispatcher.CheckAccess())
-            {
-                _ = Dispatcher.Invoke(DownloadFile);
-                return;
-            }
-
-            try
-            {
-                TransformControls(false);
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                statusBarDownloads.Content = "Downloading cache file!";
-
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_3DS), "3DS");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_AMIGA), "AMIGA");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_2600), "ATARI 2600");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_5200), "ATARI 5200");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_7800), "ATARI 7800");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_JAGUAR), "ATARI JAGUAR");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_DREAMCAST), "DREAMCAST");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_FAMICOM), "FAMICOM");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMECUBE), "GAME CUBE");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR), "GAME GEAR");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GB), "GAME BOY");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBA), "GAME BOY ADVANCE");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBC), "GAME BOY COLOR");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MAME), "M.A.M.E");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MASTER_SYSTEM), "MASTER SYSTEM");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MEGA_DRIVE), "MEGA DRIVE");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_N64), "N64");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NDS), "NDS");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NES), "NES");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PS2), "PS2");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSP), "PSP");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSX), "PSX");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_SNES), "SNES");
-                await ScrashGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_WII), "WII");
-
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                var folder = Directories.CachePath;
-                var file = Path.Combine(folder, "GameList.json");
-                JsonFormat.Export(file, ContentList);
-                TransformControls(true);
-                statusBarDownloads.Content = "Download Complete!";
-            }
-            catch
-            {
-
-            }
+            await LoadGames(GamePlataform);
+            TransformControls(true);
+            statusBarDownloads.Content = "Loaded " + GamePlataform + " games!";
         }
 
         private async Task LoadGames(string plataform)
         {
-            TransformControls(false);
             await Task.Delay(TimeSpan.FromMilliseconds(1));
-            var folder = Directories.CachePath;
-            var file = Path.Combine(folder, "GameList.json");
-            if (!File.Exists(file))
-            {
-                return;
-            }
+            TransformControls(false);
+            DataSet ds = new DataSet();
+            ds = Database.GetGamesByPlataform(plataform.ToUpper());
 
-            var jsonformat = JsonFormat.Import(file);
-
-            if (jsonformat == null)
-            {
-                await this.ShowMessageAsync(
-                    "Error",
-                        "Unable to load json file.");
-                return;
-            }
-
-            uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
+            uxGamesListView.ItemsSource = ds.Tables[0].DefaultView;
             statusBarDownloads.Content = "Loaded " + plataform + " games. Total Games: " + uxGamesListView.Items.Count.ToString();
             TransformControls(true);
+
         }
         #endregion
 
@@ -445,119 +377,141 @@ namespace romsdownloader.Views
             uxGamesListView.IsEnabled = status;
             uxTextBoxSearch.IsEnabled = status;
             uxMainTabControl.IsEnabled = status;
-
-            if (status)
-                uxGamesListView.Visibility = Visibility.Visible;
-            else
-                uxGamesListView.Visibility = Visibility.Hidden;
         }
         #endregion
 
         #region Control Events
         private async void uxGamesListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(1));
-            ListView list = (ListView)sender;
-            GameList item = (GameList)list.SelectedItem;
-            if (item != null)
+            await GrabDownloadAndStart(sender);
+        }
+
+        private async Task GrabDownloadAndStart(object sender)
+        {
+            try
             {
-                string url = item.Url;
-                var Webget = new HtmlWeb();
-                var doc = Webget.Load(url);
-
-                string _downloadlink = string.Empty;
-
-                //Search download button
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//a[@id=\"btnDownload\"]"))
+                ListView list = (ListView)sender;
+                DataRowView item = list.SelectedItem as DataRowView;
+                if (item != null)
                 {
-                    if (node.InnerText.EndsWith("(fast)"))
-                        _downloadlink = Settings.Default.ROMSPEDIA_BASE_URL + node.GetAttributeValue("href", "");
-                }
+                    string url = item.Row["url"].ToString();
+                    var Webget = new HtmlWeb();
+                    var doc = Webget.Load(url);
 
-                //Search download link
-                Webget = new HtmlWeb();
-                doc = Webget.Load(_downloadlink);
-                _downloadlink = string.Empty;
+                    string _downloadlink = string.Empty;
 
-                foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"col-12\"]//p//a"))
-                {
-                    if (node.InnerText.Equals("click here"))
-                        _downloadlink = node.GetAttributeValue("href", "");
-                }
-
-                WebDownloadClient download = new WebDownloadClient(_downloadlink);
-                download.FileName = item.Title.Trim();
-
-                // Register WebDownloadClient events
-                download.DownloadProgressChanged += download.DownloadProgressChangedHandler;
-                download.DownloadCompleted += download.DownloadCompletedHandler;
-                download.PropertyChanged += this.PropertyChangedHandler;
-                download.StatusChanged += this.StatusChangedHandler;
-                download.DownloadCompleted += this.DownloadCompletedHandler;
-
-                // Create path to temporary file
-                var folder = Directories.DownloadsPath;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("DownloadPath", "Downloads"))
-                    folder = config.Read("DownloadPath", "Downloads");
-
-                string extension = Utility.GetExtensionFromUrl(_downloadlink);
-
-                var realFileName = download.FileName + extension;
-                var filePath = Path.Combine(folder, realFileName);
-                string tempPath = filePath + ".tmp";
-
-                // Check if there is already an ongoing download on that path
-                if (File.Exists(tempPath))
-                {
-                    await this.ShowMessageAsync(
-                        "Error",
-                            "There is already a download in progress at the specified path.");
-                    return;
-                }
-
-                // Check if the file already exists
-                if (File.Exists(filePath))
-                {
-                    var result = await this.ShowMessageAsync(
-                        "Warning", "There is already a file with the same name, do you want to overwrite it? "
-                                   + "If not, please change the file name or download folder.",
-                            MessageDialogStyle.AffirmativeAndNegative);
-
-                    if (result == MessageDialogResult.Affirmative)
+                    //Search download button
+                    foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//a[@id=\"btnDownload\"]"))
                     {
-                        File.Delete(filePath);
+                        if (node.InnerText.EndsWith("(fast)"))
+                            _downloadlink = Settings.Default.ROMSPEDIA_BASE_URL + node.GetAttributeValue("href", "");
                     }
-                    else
+
+                    //Search download link
+                    Webget = new HtmlWeb();
+                    doc = Webget.Load(_downloadlink);
+                    _downloadlink = string.Empty;
+
+                    foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//div[@class=\"col-12\"]//p//a"))
+                    {
+                        if (node.InnerText.Equals("click here"))
+                            _downloadlink = node.GetAttributeValue("href", "");
+                    }
+
+                    WebDownloadClient download = new WebDownloadClient(_downloadlink);
+                    download.FileName = item.Row["title"].ToString().Trim();
+
+                    // Register WebDownloadClient events
+                    download.DownloadProgressChanged += download.DownloadProgressChangedHandler;
+                    download.DownloadCompleted += download.DownloadCompletedHandler;
+                    download.PropertyChanged += this.PropertyChangedHandler;
+                    download.StatusChanged += this.StatusChangedHandler;
+                    download.DownloadCompleted += this.DownloadCompletedHandler;
+
+                    // Create path to temporary file
+                    var folder = Directories.DownloadsPath;
+                    var cmd = Database.Connection().CreateCommand();
+                    var sql = "SELECT * FROM Downloads";
+                    cmd.CommandText = sql;
+                    SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                    while (readerConfig.Read())
+                    {
+                        //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                        if (readerConfig.GetString(7) != String.Empty)
+                            folder = readerConfig.GetString(7);
+                    }
+
+                    string extension = Utility.GetExtensionFromUrl(_downloadlink);
+
+                    var realFileName = download.FileName + extension;
+                    var filePath = Path.Combine(folder, realFileName);
+                    string tempPath = filePath + ".tmp";
+
+                    // Check if there is already an ongoing download on that path
+                    if (File.Exists(tempPath))
+                    {
+                        await this.ShowMessageAsync(
+                            "Error",
+                                "There is already a download in progress at the specified path.");
                         return;
+                    }
+
+                    // Check if the file already exists
+                    if (File.Exists(filePath))
+                    {
+                        var result = await this.ShowMessageAsync(
+                            "Warning", "There is already a file with the same name, do you want to overwrite it? "
+                                       + "If not, please change the file name or download folder.",
+                                MessageDialogStyle.AffirmativeAndNegative);
+
+                        if (result == MessageDialogResult.Affirmative)
+                        {
+                            File.Delete(filePath);
+                        }
+                        else
+                            return;
+                    }
+
+                    // Check the URL
+                    download.CheckUrl();
+                    if (download.HasError)
+                        return;
+
+                    download.TempDownloadPath = tempPath;
+
+                    download.AddedOn = DateTime.UtcNow;
+                    download.CompletedOn = DateTime.MinValue;
+                    download.OpenFileOnCompletion = false;
+
+                    // Add the download to the downloads list
+                    DownloadManager.Instance.DownloadsList.Add(download);
+
+                    // Start downloading the file
+                    bool startImmediately = true;
+                    cmd = Database.Connection().CreateCommand();
+                    sql = "SELECT * FROM Downloads";
+                    cmd.CommandText = sql;
+                    readerConfig = cmd.ExecuteReader();
+                    while (readerConfig.Read())
+                    {
+                        //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                        if (readerConfig.GetInt32(6) > 0)
+                            startImmediately = true;
+                    }
+
+                    // Start downloading the file
+                    if (startImmediately)
+                        download.Start();
+                    else
+                        download.Status = DownloadStatus.Paused;
+
+                    downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
                 }
-
-                // Check the URL
-                download.CheckUrl();
-                if (download.HasError)
-                    return;
-
-                download.TempDownloadPath = tempPath;
-
-                download.AddedOn = DateTime.UtcNow;
-                download.CompletedOn = DateTime.MinValue;
-                download.OpenFileOnCompletion = false;
-
-                // Add the download to the downloads list
-                DownloadManager.Instance.DownloadsList.Add(download);
-
-                // Start downloading the file
-                bool startImmediately = true;
-                if (config.KeyExists("StartImmediately", "Downloads"))
-                    startImmediately = Convert.ToBoolean(config.Read("StartImmediately", "Downloads"));
-
-                // Start downloading the file
-                if (startImmediately)
-                    download.Start();
-                else
-                    download.Status = DownloadStatus.Paused;
-
-                downloadsGrid.ItemsSource = DownloadManager.Instance.DownloadsList;
+            }
+            catch (Exception ex)
+            {
+                await this.ShowMessageAsync("Error", ex.Message);
+                return;
             }
         }
 
@@ -647,36 +601,44 @@ namespace romsdownloader.Views
                 this.statusBarCompleted.Content = String.Empty;
         }
 
-        private async void uxTextBoxSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private async void uxTextBoxSearch_KeyDown(object sender, KeyEventArgs e)
         {
-            string keyword = uxTextBoxSearch.Text;
+            string title = uxTextBoxSearch.Text;
             string plataform = uxComboPlataform.Text;
             if (string.IsNullOrEmpty(plataform))
                 return;
 
-            var folder = "Cache";
-            var file = Path.Combine(folder, "GameList.json");
-            if (!File.Exists(file))
-            {
+            if (title == String.Empty)
                 return;
-            }
 
-            if (keyword.Length >= 1)
+            if (e.Key == Key.Enter)
             {
-                var jsonformat = JsonFormat.Import(file);
+                DataSet ds = new DataSet();
+                ds = Database.GetGamesByNameAndPlataform(title, plataform.ToUpper());
 
-                if (jsonformat == null)
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    if (SearchWindow.Instance == null)
+                    {
+                        SearchWindow.Instance = new SearchWindow(ds);
+                        SearchWindow.Instance.Show();
+                        SearchWindow.Instance.Closed += (o, a) => { SearchWindow.Instance = null; };
+                    }
+                    else if (SearchWindow.Instance != null && !SearchWindow.Instance.IsActive)
+                    {
+                        SearchWindow.Instance.Activate();
+                    }
+                }
+                else
                 {
                     await this.ShowMessageAsync(
                         "Error",
-                            "Unable to load json file.");
+                            "There is no results found.");
                     return;
                 }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
-                uxGamesListView.ItemsSource = jsonformat.GameList.Where(c => c.Title.ToUpper().Contains(keyword.ToUpper())).Where(c => c.Plataform.ToUpper().Equals(plataform.ToUpper()));
             }
         }
+
 
         public void DownloadCompletedHandler(object sender, EventArgs e)
         {
@@ -692,11 +654,126 @@ namespace romsdownloader.Views
 
         private async void uxComboPlataform_DropDownClosed(object sender, EventArgs e)
         {
-            string selectionText = uxComboPlataform.Text.Trim().ToUpper();
-            if (string.IsNullOrEmpty(selectionText))
+            string selectedPlataform = uxComboPlataform.Text;
+            selectedPlataform = selectedPlataform.ToUpper();
+            if (string.IsNullOrEmpty(selectedPlataform))
                 return;
 
-            await LoadGames(selectionText);
+            try
+            {
+                if (Database.ColumnPlataformHasValue("Games", selectedPlataform.ToUpper()))
+                {
+                    TransformControls(false);
+                    await LoadGames(selectedPlataform);
+                    TransformControls(true);
+                }
+                else
+                {
+
+                    switch (selectedPlataform)
+                    {
+                        case "3DS":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_3DS), "3DS");
+                            break;
+
+                        case "AMIGA":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_AMIGA), "AMIGA");
+                            break;
+
+                        case "ATARI 2600":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_2600), "ATARI 2600");
+                            break;
+
+                        case "ATARI 5200":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_5200), "ATARI 5200");
+                            break;
+
+                        case "ATARI 7800":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_7800), "ATARI 7800");
+                            break;
+
+                        case "ATARI JAGUAR":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_ATARI_JAGUAR), "ATARI JAGUAR");
+                            break;
+
+                        case "DREAMCAST":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_DREAMCAST), "DREAMCAST");
+                            break;
+
+                        case "FAMICOM":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_FAMICOM), "FAMICOM");
+                            break;
+
+                        case "GAME CUBE":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMECUBE), "GAME CUBE");
+                            break;
+
+                        case "GAME GEAR":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR), "GAME GEAR");
+                            break;
+
+                        case "GAME BOY":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GAMEGEAR), "GAME GEAR");
+                            break;
+
+                        case "GAME BOY ADVANCE":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBA), "GAME BOY ADVANCE");
+                            break;
+
+                        case "GAME BOY COLOR":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_GBC), "GAME BOY COLOR");
+                            break;
+
+                        case "M.A.M.E":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MAME), "M.A.M.E");
+                            break;
+
+                        case "MASTER SYSTEM":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MASTER_SYSTEM), "MASTER SYSTEM");
+                            break;
+
+                        case "MEGA DRIVE":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_MEGA_DRIVE), "MEGA DRIVE");
+                            break;
+
+                        case "N64":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_N64), "N64");
+                            break;
+
+                        case "NDS":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NDS), "NDS");
+                            break;
+
+                        case "NES":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_NES), "NES");
+                            break;
+
+                        case "PS2":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PS2), "PS2");
+                            break;
+
+                        case "PSP":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSP), "PSP");
+                            break;
+
+                        case "PSX":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_PSX), "PSX");
+                            break;
+
+                        case "SNES":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_SNES), "SNES");
+                            break;
+
+                        case "WII":
+                            await ScrapGames(Path.Combine(Settings.Default.ROMSPEDIA_BASE_URL + Settings.Default.ROMSPEDIA_PATH_WII), "WII");
+                            break;
+                    }
+                }
+            }
+            catch
+            {
+
+            }
         }
         #endregion
 

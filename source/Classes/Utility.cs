@@ -2,68 +2,44 @@
 using romsdownload.Data;
 using romsdownloader.Views;
 using System;
-using System.Globalization;
+using System.Data.SQLite;
 using System.IO;
-using System.Reflection;
-using System.Text;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Xml.Serialization;
 
 namespace romsdownloader.Classes
 {
     internal class Utility
     {
-        public static void CreateFileFromResource(string path, string resource, bool overwrite = false)
+        public static string GenerateRandomString(int length)
         {
-            if (!overwrite && File.Exists(path))
-            {
-                return;
-            }
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource))
-            {
-                if (stream != null)
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        using (var sw = new StreamWriter(path, false, Encoding.UTF8))
-                        {
-                            sw.Write(reader.ReadToEnd());
-                        }
-                    }
-                }
-            }
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdfghijklmnopqrstuvwxyz";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
-
-        public static void MapClassToXmlFile(Type type, object obj, string path)
-        {
-            var serializer = new XmlSerializer(type);
-            using (var sw = new StreamWriter(path, false, Encoding.UTF8))
-            {
-                serializer.Serialize(sw, obj);
-            }
-        }
-
-        public static object MapXmlFileToClass(Type type, string path)
-        {
-            var serializer = new XmlSerializer(type);
-            using (var reader = new StreamReader(path, Encoding.UTF8))
-            {
-                return serializer.Deserialize(reader);
-            }
-        }
-
         public static void CreateDirectories()
         {
             try
             {
                 var path = Directories.DownloadsPath;
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                if (config.KeyExists("DownloadPath", "Downloads"))
-                    path = config.Read("DownloadPath", "Downloads");
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
+                {
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
 
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
+                    if (readerConfig.GetString(7) != string.Empty)
+                        path = readerConfig.GetString(7);
+
+                    if (path == string.Empty)
+                    {
+                        if (!Directory.Exists(path))
+                            Directory.CreateDirectory(path);
+                    }
+                }
 
                 path = Directories.LogsPath;
                 if (!Directory.Exists(path))

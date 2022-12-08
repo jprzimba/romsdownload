@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Data;
+using System.Data.SQLite;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using ControlzEx.Standard;
 using ControlzEx.Theming;
 using romsdownload.Data;
 using romsdownload.Views;
@@ -22,36 +25,66 @@ namespace romsdownloader
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-
             try
             {
-                if (!File.Exists(Directories.ConfigFilePath))
-                    File.Create(Directories.ConfigFilePath);
+                if (!File.Exists(Directories.DatabasePath))
+                    Database.CreateDatabase();
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Can't create config file!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Application.Current.Shutdown();
+                MessageBox.Show("Error: " + ex.Message);
             }
 
-            Window start;
-            IniFile config = new IniFile(Directories.ConfigFilePath);
-            if (config.KeyExists("SelectedStyle", "Theme"))
-                ThemeManager.Current.ChangeThemeBaseColor(Application.Current, config.Read("SelectedStyle", "Theme"));
+            LoadConfigs();
+        }
 
-            if (config.KeyExists("SelectedColor", "Theme"))
-                ThemeManager.Current.ChangeThemeColorScheme(Application.Current, config.Read("SelectedColor", "Theme"));
-
-
-            if (config.KeyExists("DownloadPath", "Downloads"))
+        private void LoadConfigs()
+        {
+            try
             {
-                start = new MainWindow();
-                start.Show();
+                //Theme
+                var cmd = Database.Connection().CreateCommand();
+                var sql = "SELECT * FROM Theme";
+                cmd.CommandText = sql;
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string style = reader.GetString(0);//style
+                    string color = reader.GetString(1);//theme
+                    ThemeManager.Current.ChangeThemeBaseColor(Application.Current, style);
+                    ThemeManager.Current.ChangeThemeColorScheme(Application.Current, color);
+                }
+
+                //Startup
+                Window start;
+                cmd = Database.Connection().CreateCommand();
+                sql = "SELECT * FROM Downloads";
+                cmd.CommandText = sql;
+                SQLiteDataReader readerConfig = cmd.ExecuteReader();
+                while (readerConfig.Read())
+                {
+                    //memorycachesize, maxdownloads, enablespeedlimit, speedlimit, startdownloadsonstartup, startimmediately, downloadpath
+                    string downloadpath = readerConfig.GetString(7);
+                    if (downloadpath != string.Empty)
+                    {
+                        start = new MainWindow();
+                        start.Show();
+                    }
+                    else
+                    {
+                        start = new StartupWindow();
+                        start.Show();
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                start = new StartupWindow();
-                start.Show();
+                MessageBox.Show("Error: " + ex.Message);
+            }
+            finally
+            {
+                if (Database.Connection().State == ConnectionState.Open)
+                    Database.Connection().Close();
             }
         }
 

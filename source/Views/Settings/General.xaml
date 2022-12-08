@@ -8,7 +8,8 @@
     mc:Ignorable="d"
     Title="Settings" Height="191" Width="262"
     ShowMinButton="False" ShowMaxRestoreButton="False"
-    WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Closing="MetroWindow_Closing"
+    Loaded="MetroWindow_Loaded">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -29,12 +30,12 @@
                 <DockPanel>
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
                         <Label Content="Style" Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
-                        <ComboBox x:Name="uxComboStyle" Margin="10" Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom" Loaded="Style_Loaded" SelectionChanged="Style_SelectionChanged" Width="135" />
+                        <ComboBox x:Name="uxComboStyle" Margin="10" Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom" SelectionChanged="Style_SelectionChanged" Width="135" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
                         <Label Content="Color" Margin="10" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center"/>
-                        <ComboBox x:Name="uxComboColor" Margin="10" Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" Loaded="Color_Loaded" SelectionChanged="Color_SelectionChanged" Width="135" />
+                        <ComboBox x:Name="uxComboColor" Margin="10" Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" SelectionChanged="Color_SelectionChanged" Width="135" />
                     </StackPanel>
                 </DockPanel>
             </GroupBox>

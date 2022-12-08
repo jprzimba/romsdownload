@@ -1,8 +1,7 @@
 ﻿using ControlzEx.Theming;
 using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 using romsdownload.Data;
-using romsdownloader.Classes;
+using System.Data.SQLite;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,59 +27,67 @@ namespace romsdownload.Views.Settings
             "Light", "Dark"
         };
 
+        private string selectedStyle;
+        private string selectedColor;
+
         public General()
         {
             InitializeComponent();
             Instance = this;
         }
 
-        private void Style_Loaded(object sender, RoutedEventArgs e)
-        {
-            foreach (var theme in _style)
-                uxComboStyle.Items.Add(theme);
-
-            IniFile config = new IniFile(Directories.ConfigFilePath);
-            if (config.KeyExists("SelectedStyle", "Theme"))
-               uxComboStyle.SelectedItem = config.Read("SelectedStyle", "Theme");
-
-            if (uxComboStyle.SelectedIndex == -1)
-                uxComboStyle.SelectedIndex = uxComboStyle.Items.IndexOf("Light");
-        }
-
-
-        private void Color_Loaded(object sender, RoutedEventArgs e)
-        {
-            foreach (var color in _accentColors)
-                uxComboColor.Items.Add(color);
-
-            IniFile config = new IniFile(Directories.ConfigFilePath);
-            if (config.KeyExists("SelectedColor", "Theme"))
-                uxComboColor.SelectedItem = config.Read("SelectedColor", "Theme");
-
-            if (uxComboColor.SelectedIndex == -1)
-                uxComboColor.SelectedIndex = uxComboColor.Items.IndexOf("Blue");
-        }
-
         private void Color_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var color = uxComboColor.SelectedValue.ToString();
-            if (_accentColors.Contains(color))
-            {
-                ThemeManager.Current.ChangeThemeColorScheme(Application.Current, color);
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                config.Write("SelectedColor", color,  "Theme");
-            }
+            selectedColor = uxComboColor.SelectedValue.ToString();
+            if (_accentColors.Contains(selectedColor))
+                ThemeManager.Current.ChangeThemeColorScheme(Application.Current, selectedColor);
         }
 
         private void Style_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var style = uxComboStyle.SelectedValue.ToString();
-            if (_style.Contains(style))
+            selectedStyle = uxComboStyle.SelectedValue.ToString();
+            if (_style.Contains(selectedStyle))
+                ThemeManager.Current.ChangeThemeBaseColor(Application.Current, selectedStyle);
+        }
+
+        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            selectedStyle = uxComboStyle.SelectedValue.ToString();
+            selectedColor = uxComboColor.SelectedValue.ToString();
+
+            Database.UpdateTheme(selectedStyle, selectedColor);
+        }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            //Update Theme
+            foreach (var color in _accentColors)
+                uxComboColor.Items.Add(color);
+
+            foreach (var theme in _style)
+                uxComboStyle.Items.Add(theme);
+
+            var cmd = Database.Connection().CreateCommand();
+
+            string sql = "SELECT * FROM Theme";
+            cmd.CommandText = sql;
+            SQLiteDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                ThemeManager.Current.ChangeThemeBaseColor(Application.Current, style);
-                IniFile config = new IniFile(Directories.ConfigFilePath);
-                config.Write("SelectedStyle", style, "Theme");
+                //Theme
+                string style = reader.GetString(0);//style
+                string color = reader.GetString(1);//theme
+
+                uxComboStyle.SelectedItem = style;
+                uxComboColor.SelectedItem = color;
             }
+
+            if (uxComboStyle.SelectedIndex == -1)
+                uxComboStyle.SelectedIndex = uxComboStyle.Items.IndexOf("Light");
+
+            if (uxComboColor.SelectedIndex == -1)
+                uxComboColor.SelectedIndex = uxComboColor.Items.IndexOf("Blue");
         }
     }
 }
